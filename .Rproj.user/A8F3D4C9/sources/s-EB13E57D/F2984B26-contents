@@ -1,0 +1,102 @@
+#include <Rcpp.h>
+
+#include <vector>
+#include <random>
+
+#include "TRAISIE_rates.h"
+#include "TRAISIE_pickevent.h"
+#include "TRAISIE_island_spec.h"
+#include "TRAISIE_util.h"
+
+double calc_next_time_eval(const rates& r,
+                           double timeval,
+                           std::mt19937& rndgen) {
+  double s = r.sum();
+  std::exponential_distribution<> d(s);
+
+  double dt = d(rndgen); // draw random number exp
+  return timeval + dt;
+}
+
+
+// [[Rcpp::export]]
+Rcpp::List update_time_loop(double timeval,
+                      double total_time,
+                      double gam,
+                      double laa,
+                      double lac,
+                      double mu,
+                      Rcpp::List area_pars_from_R,
+                      double K,
+                      double num_spec,
+                      double num_immigrants,
+                      double mainland_n,
+                      int maxspecID,
+                      Rcpp::List trait_pars_R,
+                      Rcpp::NumericVector mainland_spec_R) {
+
+  area_pars ap(area_pars_from_R);
+  rates trait_pars(trait_pars_R);
+
+  std::vector<double> mainland_spec(mainland_spec_R.begin(), mainland_spec_R.end());
+
+  std::vector< std::array< double, 7> > stt_table;
+  stt_table.push_back({total_time, 0, 0, 0, 0, 0, 0});
+  island_spec island_spec_;
+
+  std::random_device rd;
+  std::mt19937 rndgen(rd());
+
+
+  while (timeval < total_time) {
+    auto all_rates = update_rates(
+      timeval,
+      total_time,
+      gam,
+      laa,
+      lac,
+      mu,
+      ap,
+      K,
+      num_spec,
+      num_immigrants,
+      mainland_n,
+      island_spec_,
+      trait_pars);
+
+
+    timeval = calc_next_time_eval(all_rates, timeval, rndgen);
+
+    if (timeval < total_time) {
+      auto possible_event = all_rates.sample_event(rndgen);
+
+      DAISIE_sim_update_state_trait_dep(timeval,
+                                        total_time,
+                                        possible_event,
+                                        maxspecID,
+                                        mainland_spec,
+                                        island_spec_,
+                                        trait_pars,
+                                        stt_table,
+                                        rndgen);
+
+      num_spec = island_spec_.size();
+      num_immigrants = 0;
+      for (const auto& i : island_spec_.data_) {
+        if (i.type_species == species_type::I) num_immigrants++;
+      }
+    }
+  }
+  // finalize stt_table
+
+  std::array<double, 7> add = stt_table.back();
+  add[0] = 0.0;
+  stt_table.push_back(add);
+
+  Rcpp::NumericMatrix stt_table_for_R = make_stt_table_for_R(stt_table);
+  Rcpp::StringMatrix  island_spec_for_R = make_island_spec_for_R(island_spec);
+
+  Rcpp::List output = List::create(
+          Rcpp::Named("stt_table") = stt_table_for_R,
+          Rcpp::Named("island_spec") = island_spec_for_R);
+}

@@ -1,0 +1,142 @@
+#include <Rcpp.h>
+
+#include <vector>
+#include <random>
+
+#include <thread>
+#include <chrono>
+
+#include "TRAISIE_rates.h"
+#include "TRAISIE_pickevent.h"
+#include "TRAISIE_island_spec.h"
+#include "TRAISIE_util.h"
+
+double calc_next_time_eval(const rates& r,
+                           double timeval,
+                           std::mt19937& rndgen) {
+  double s = r.sum();
+  std::exponential_distribution<> d(s);
+
+  double dt = d(rndgen); // draw random number exp
+  return timeval + dt;
+}
+
+void output(std::string focal_text) {
+  Rcpp::Rcout << focal_text << "\n";
+  std::this_thread::sleep_for(std::chrono::milliseconds(3));
+  R_FlushConsole();
+  R_ProcessEvents();
+  R_CheckUserInterrupt();
+}
+
+
+
+//' CPP function to execute expensive loop
+//' @param timeval timeval
+//' @param total_time total time
+//' @param gam immigration rate
+//' @param laa anagenetic rate
+//' @param lac cladogenetic rate
+//' @param mu extinction rate
+//' @param area_pars_from_R area pars
+//' @param K K
+//' @param num_spec number of species
+//' @param num_immigrants number of immigrants
+//' @param mainland_n number of species on mainland
+//' @param maxspecID maxpsecid
+//' @param trait_pars_R trait pars
+//' @param mainland_spec_R mainland spec
+//' @return list with stt_table and island_spec
+//' @export
+// [[Rcpp::export]]
+Rcpp::List execute_time_loop(double timeval,
+                      double total_time,
+                      double gam,
+                      double laa,
+                      double lac,
+                      double mu,
+                      Rcpp::List area_pars_from_R,
+                      double K,
+                      double num_spec,
+                      double num_immigrants,
+                      double mainland_n,
+                      int maxspecID,
+                      Rcpp::List trait_pars_R,
+                      Rcpp::NumericVector mainland_spec_R) {
+
+  area_pars ap(area_pars_from_R);
+  output("area_pars loaded");
+  rates trait_pars(gam, laa, lac, mu, trait_pars_R);
+  output("trait_pars loaded");
+
+  std::vector<double> mainland_spec(mainland_spec_R.begin(), mainland_spec_R.end());
+
+  std::vector< std::array< double, 7> > stt_table;
+  stt_table.push_back({total_time, 0, 0, 0, 0, 0, 0});
+  island_spec island_spec_;
+
+  std::random_device rd;
+  std::mt19937 rndgen(rd());
+
+  output("starting loop");
+
+  while (timeval < total_time) {
+    auto all_rates = update_rates(
+      timeval,
+      total_time,
+      gam,
+      laa,
+      lac,
+      mu,
+      ap,
+      K,
+      num_spec,
+      num_immigrants,
+      mainland_n,
+      island_spec_,
+      trait_pars);
+
+
+    timeval = calc_next_time_eval(all_rates, timeval, rndgen);
+    Rcpp::Rcout << timeval << "\n";
+
+    if (timeval < total_time) {
+      auto possible_event = all_rates.sample_event(rndgen);
+      Rcpp::Rcout << possible_event << "\n";
+
+      DAISIE_sim_update_state_trait_dep(timeval,
+                                        total_time,
+                                        possible_event,
+                                        maxspecID,
+                                        mainland_spec,
+                                        island_spec_,
+                                        trait_pars,
+                                        stt_table,
+                                        rndgen);
+
+      num_spec = island_spec_.size();
+      num_immigrants = 0;
+      for (const auto& i : island_spec_.data_) {
+        if (i.type_species == species_type::I) num_immigrants++;
+      }
+    }
+  }
+  // finalize stt_table
+  output("done loop, finalizing");
+
+  std::array<double, 7> add = stt_table.back();
+  add[0] = 0.0;
+  stt_table.push_back(add);
+
+  output("starting conversion stt");
+  Rcpp::NumericMatrix stt_table_for_R = make_stt_table_for_R(stt_table);
+  output("done conversion stt");
+  output("starting conversion island spec");
+  Rcpp::StringMatrix  island_spec_for_R = make_island_spec_for_R(island_spec_);
+  output("done conversion island spec");
+
+  Rcpp::List output = Rcpp::List::create(
+          Rcpp::Named("stt_table") = stt_table_for_R,
+          Rcpp::Named("island_spec") = island_spec_for_R);
+  return output;
+}
