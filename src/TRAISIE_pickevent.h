@@ -3,7 +3,6 @@
 
 #include <Rcpp.h>
 #include <vector>
-#include <random>
 #include "TRAISIE_rates.h"
 #include "TRAISIE_island_spec.h"
 
@@ -78,14 +77,27 @@ void remove_cladogenetic(island_spec& is,
   return;
 }
 
+template <typename T>
+int draw_prop(const std::vector<T>& v) {
+  double s = std::accumulate(v.begin(), v.end(), 0.0);
+  double r = R::runif(0, s);
+  int index = 0;
+  for( ; index < v.size(); ++index) {
+    r -= v[index];
+    if (r <= 0.0) {
+      break;
+    }
+  }
+  return index;
+}
+
+
 
 void immigration(double timeval,
                  const std::vector<double>& mainland_spec,
-                 island_spec& is,
-                 std::mt19937& rndgen) {
+                 island_spec& is) {
 
-  std::discrete_distribution<int> dist(mainland_spec.begin(), mainland_spec.end());
-  int colonist = dist(rndgen);
+  int colonist = draw_prop(mainland_spec);
 
   int is_it_there = -1;
   if (!is.empty()) {
@@ -108,7 +120,6 @@ void immigration(double timeval,
 }
 
 void extinction(island_spec& is,
-                std::mt19937& rndgen,
                 int focal_trait) {
 
   if (is.empty()) return;
@@ -117,10 +128,8 @@ void extinction(island_spec& is,
   for (size_t i = 0; i < is.size(); ++i) {
     if (is[i].trait == focal_trait) island_spec_state.push_back(i);
   }
-  std::discrete_distribution<int> dist(island_spec_state.begin(),
-                                       island_spec_state.end());
 
-  int extinct = dist(rndgen);
+  int extinct = draw_prop(island_spec_state);
 
   auto type_of_species = is[extinct].type_species;
   if (type_of_species == species_type::I) { // 0 == "I
@@ -137,7 +146,6 @@ void extinction(island_spec& is,
 
 void anagenesis(island_spec& is,
                 int& maxspecID,
-                std::mt19937& rndgen,
                 int focal_trait) {
 
    std::vector<size_t> immi_specs;
@@ -150,8 +158,7 @@ void anagenesis(island_spec& is,
    auto anagenesis = immi_specs[0];
 
    if (immi_specs.size() > 1) {
-     std::uniform_int_distribution<int> dist(0, immi_specs.size() - 1);
-     auto index = dist(rndgen);
+     int index = static_cast<int>(R::runif(0, immi_specs.size()));
      anagenesis = immi_specs[index];
    }
 
@@ -168,7 +175,6 @@ void anagenesis(island_spec& is,
 void cladogenesis(island_spec& is,
                   double timeval,
                   int maxspecID,
-                  std::mt19937& rndgen,
                   int focal_trait) {
 
   std::vector<size_t> island_spec_state;
@@ -176,8 +182,7 @@ void cladogenesis(island_spec& is,
     if (is[i].trait == focal_trait) island_spec_state.push_back(i);
   }
 
-  std::uniform_int_distribution<int> dist(0, island_spec_state.size() - 1);
-  auto index = dist(rndgen);
+  int index = static_cast<int>(R::runif(0, island_spec_state.size()));
   auto to_split = island_spec_state[index];
 
   if (is[to_split].type_species == species_type::C) {
@@ -224,14 +229,13 @@ void cladogenesis(island_spec& is,
 }
 
 void transition(island_spec& is,
-                std::mt19937& rndgen,
                 int focal_trait) {
   std::vector<size_t> island_spec_state;
   for (size_t i = 0; i < is.size(); ++i) {
     if (is[i].trait == focal_trait) island_spec_state.push_back(i);
   }
-  std::uniform_int_distribution<int> dist(0, island_spec_state.size() - 1);
-  auto index = dist(rndgen);
+
+  int index = static_cast<int>(R::runif(0, island_spec_state.size()));
   auto totrans = island_spec_state[index];
   if (focal_trait == 1) {
     is[totrans].trait = 2;
@@ -245,14 +249,12 @@ void transition(island_spec& is,
 void immigration_state2(island_spec& is,
                         std::vector<double> mainland_spec,
                         double timeval,
-                        const rates& trait_pars,
-                        std::mt19937& rndgen) {
+                        const rates& trait_pars) {
 
   auto mainland1 = mainland_spec.size();
   auto mainland2 = trait_pars.M2;
 //  auto mainland_total = mainland1 + mainland2;
-  std::uniform_int_distribution<int> dist(0, mainland2);
-  auto index = dist(rndgen);
+  int index = static_cast<int>(R::runif(0, mainland2));
   auto colonist = index + mainland1 + 1;
 
   int is_it_there = -1;
@@ -282,20 +284,19 @@ void DAISIE_sim_update_state_trait_dep(double timeval,
                                        const std::vector<double>& mainland_spec,
                                        island_spec& is,
                                        const rates& trait_pars,
-                                       std::vector< std::array<double, 7>>& stt_table,
-                                       std::mt19937& rndgen) {
+                                       std::vector< std::array<double, 7>>& stt_table) {
 
   switch(event) {
-    case 1: { immigration(timeval, mainland_spec, is, rndgen); break;}
-    case 2: { extinction(is, rndgen, 1); break;}
-    case 3: { anagenesis(is, maxspecID, rndgen, 1); break;}
-    case 4: { cladogenesis(is, maxspecID, timeval, rndgen, 1); break;}
-    case 5: { transition(is, rndgen, 1); break;}
-    case 6: { immigration_state2(is, mainland_spec, timeval, trait_pars, rndgen); break;}
-    case 7: { extinction(is, rndgen, 2); break;}
-    case 8: { anagenesis(is, maxspecID, rndgen, 2); break;}
-    case 9: { cladogenesis(is, maxspecID, timeval, rndgen, 2); break;}
-    case 10:{ transition(is, rndgen, 2); break;}
+    case 1: { immigration(timeval, mainland_spec, is); break;}
+    case 2: { extinction(is, 1); break;}
+    case 3: { anagenesis(is, maxspecID, 1); break;}
+    case 4: { cladogenesis(is, maxspecID, timeval, 1); break;}
+    case 5: { transition(is, 1); break;}
+    case 6: { immigration_state2(is, mainland_spec, timeval, trait_pars); break;}
+    case 7: { extinction(is, 2); break;}
+    case 8: { anagenesis(is, maxspecID, 2); break;}
+    case 9: { cladogenesis(is, maxspecID, timeval, 2); break;}
+    case 10:{ transition(is, 2); break;}
   }
 
   if (total_time >= timeval) {

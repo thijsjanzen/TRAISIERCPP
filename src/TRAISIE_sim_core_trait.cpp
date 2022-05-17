@@ -1,7 +1,6 @@
 #include <Rcpp.h>
 
 #include <vector>
-#include <random>
 
 #include <thread>
 #include <chrono>
@@ -12,12 +11,10 @@
 #include "TRAISIE_util.h"
 
 double calc_next_time_eval(const rates& r,
-                           double timeval,
-                           std::mt19937& rndgen) {
+                           double timeval) {
   double s = r.sum();
-  std::exponential_distribution<> d(s);
+  double dt = R::rexp(s);
 
-  double dt = d(rndgen); // draw random number exp
   return timeval + dt;
 }
 
@@ -86,9 +83,6 @@ Rcpp::List execute_time_loop(double timeval,
   stt_table.push_back({total_time, 0, 0, 0, 0, 0, 0});
   island_spec island_spec_;
 
-  std::random_device rd;
-  std::mt19937 rndgen(rd());
-
   int num_spec = island_spec_.size();
   int num_immigrants = update_num_immigrants(island_spec_);
 
@@ -113,11 +107,11 @@ Rcpp::List execute_time_loop(double timeval,
       trait_pars);
 
 
-    timeval = calc_next_time_eval(all_rates, timeval, rndgen);
+    timeval = calc_next_time_eval(all_rates, timeval);
   //  Rcpp::Rcout << timeval << "\n";
 
     if (timeval < total_time) {
-      auto possible_event = all_rates.sample_event(rndgen);
+      auto possible_event = all_rates.sample_event();
    //   Rcpp::Rcout << possible_event << "\n";
 
       DAISIE_sim_update_state_trait_dep(timeval,
@@ -127,8 +121,7 @@ Rcpp::List execute_time_loop(double timeval,
                                         mainland_spec,
                                         island_spec_,
                                         trait_pars,
-                                        stt_table,
-                                        rndgen);
+                                        stt_table);
 
       num_spec = island_spec_.size();
       num_immigrants = update_num_immigrants(island_spec_);

@@ -6,8 +6,6 @@
 #include <array>
 #include <string>
 
-#include <random>
-
 #include "TRAISIE_island_spec.h"
 
 struct area_pars { // not really used though
@@ -58,14 +56,27 @@ struct rates {
     // should also add M2?
   }
 
-  int sample_event(std::mt19937& rndgen) {
-     std::discrete_distribution<int> event_prob = {immig_rate, ext_rate,
+  int sample_event() {
+     std::vector<double> event_prob = {immig_rate, ext_rate,
                                                    ana_rate, clado_rate,
                                                    trans_rate, immig_rate2,
                                                    ext_rate2, ana_rate2,
                                                    clado_rate2,
                                                    trans_rate2};
-    return event_prob(rndgen) + 1; // +1 to conform to R indexing style
+
+    double s = std::accumulate(event_prob.begin(), event_prob.end(), 0.0);
+    double r = R::runif(0.0, s);
+    int index = 0;
+
+    for( ; index < event_prob.size(); ++index) {
+      r -= event_prob[index];
+      if (r <= 0.0) {
+        break;
+      }
+    }
+    return index + 1;
+
+  //  return event_prob(rndgen) + 1; // +1 to conform to R indexing style
   }
 
   rates(two_rates immig,
