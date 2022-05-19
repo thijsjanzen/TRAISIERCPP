@@ -127,7 +127,6 @@ max extinction horizon at time t.
 Other rate calculations: 
 \code{\link{DAISIE_get_ana_rate}()},
 \code{\link{DAISIE_get_ext_rate}()},
-\code{\link{DAISIE_get_immig_rate}()},
-\code{\link{DAISIE_island_area}()}
+\code{\link{DAISIE_get_immig_rate}()}
 }
 \concept{rate calculations}

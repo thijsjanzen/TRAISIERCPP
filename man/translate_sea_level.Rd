@@ -21,7 +21,4 @@ Numeric, 0 for null-sea-level, 1 for sine function
 \description{
 Translate user-friendly sea-level codes to numerics
 }
-\examples{
-translated_sea_level <- DAISIE:::translate_sea_level("const")
-}
 \keyword{internal}

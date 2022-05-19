@@ -2,7 +2,7 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #' function to draw event.
-#' @param event_prob
+#' @param event_prob event probability vector
 #' @return event
 #' @export
 sample_event <- function(event_prob) {
@@ -32,12 +32,8 @@ test_get_immig_rate <- function(gam, A, num_spec, K, mainland_n, mainland_n2, im
 #' @param mu extinction rate
 #' @param area_pars_from_R area pars
 #' @param K K
-#' @param num_spec number of species
-#' @param num_immigrants number of immigrants
 #' @param mainland_n number of species on mainland
-#' @param maxspecID maxpsecid
 #' @param trait_pars_R trait pars
-#' @param mainland_spec_R mainland spec
 #' @return list with stt_table and island_spec
 #' @export
 execute_time_loop <- function(timeval, total_time, gam, laa, lac, mu, area_pars_from_R, K, mainland_n, trait_pars_R) {

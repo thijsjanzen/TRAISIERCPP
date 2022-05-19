@@ -22,7 +22,4 @@ Numeric, 0 for null-ontogeny, 1 for beta function
 \description{
 Translate user-friendly ontogeny codes to numerics
 }
-\examples{
-translated_ontogeny <- DAISIE:::translate_island_ontogeny("const")
-}
 \keyword{internal}

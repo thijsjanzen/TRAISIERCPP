@@ -37,7 +37,6 @@ immigrant species and the per capita rate.
 Other rate calculations: 
 \code{\link{DAISIE_get_ext_rate}()},
 \code{\link{DAISIE_get_immig_rate}()},
-\code{\link{DAISIE_island_area}()},
 \code{\link{DAISIE_update_rates_trait}()}
 }
 \author{

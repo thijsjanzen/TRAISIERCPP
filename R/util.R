@@ -5,9 +5,6 @@
 #' @return Named list with hyperparameters
 #' @export
 #' @author Pedro Neves, Joshua Lambert
-#'
-#' @examples
-#' hyper_pars <- create_hyper_pars(d = 0.027, x = 0.15)
 create_hyper_pars <- function(d, x) {
   testit::assert(d >= 0.0)
   testit::assert(is.numeric(x))
@@ -27,19 +24,6 @@ create_hyper_pars <- function(d, x) {
 #' @author Richel J.C Bilderbeek, Joshua Lambert, Pedro Neves
 #'
 #'
-#' @examples
-#' testit::assert(DAISIE:::are_area_pars(
-#' create_area_pars(
-#'   max_area = 10,
-#'   current_area = 1,
-#'   proportional_peak_t = 0.5,
-#'   total_island_age = 5,
-#'   sea_level_amplitude = 5,
-#'   sea_level_frequency = 10,
-#'   island_gradient_angle = 0
-#'       )
-#'     )
-#'   )
 create_area_pars <- function(max_area,
                              current_area,
                              proportional_peak_t,
@@ -71,7 +55,6 @@ create_area_pars <- function(max_area,
 #'
 #' @return Numeric, 0 for null-ontogeny, 1 for beta function
 #' @keywords internal
-#' @examples translated_ontogeny <- DAISIE:::translate_island_ontogeny("const")
 translate_island_ontogeny <- function(island_ontogeny) {
 
   if (island_ontogeny == "const" || island_ontogeny == 0) {
@@ -89,7 +72,6 @@ translate_island_ontogeny <- function(island_ontogeny) {
 #'
 #' @return Numeric, 0 for null-sea-level, 1 for sine function
 #' @keywords internal
-#' @examples translated_sea_level <- DAISIE:::translate_sea_level("const")
 translate_sea_level <- function(sea_level) {
 
   if (sea_level == "const" || sea_level == 0) {
@@ -426,16 +408,7 @@ DAISIE_ONEcolonist <- function(time,
 #' @return list of numerical values containing trait state parameters
 #' @export
 #'
-#' @examples
-#' testit::assert(DAISIE:::are_trait_pars(
-#'   create_trait_pars(
-#'     trans_rate = 0.5,
-#'     immig_rate2 = 0.1,
-#'     ext_rate2 = 0.2,
-#'     ana_rate2 = 0.3,
-#'     clado_rate2 = 0.4,
-#'     trans_rate2 = 0.5,
-#'     M2 = 1000)) == TRUE)
+
 create_trait_pars <- function(trans_rate,
                               immig_rate2,
                               ext_rate2,
@@ -1125,24 +1098,6 @@ DAISIE_format_CS_sampled_stt <- function(island_replicates,
 #' Galapagos islands. Ecology Letters 18: 844-852.
 #' @keywords models
 #' @export
-#' @examples
-#'
-#'
-#' ### Plot islands with single process (only one type of species)
-#' utils::data(islands_1type_1000reps)
-#' DAISIE_plot_sims(
-#'   island_replicates = islands_1type_1000reps
-#'   )
-#'
-#'
-#' ### Plot island with type 1 and type 2
-#' utils::data(islands_2types_1000reps)
-#' DAISIE_plot_sims(
-#'   island_replicates = islands_2types_1000reps
-#'   )
-#'
-#'
-#'
 DAISIE_plot_sims <- function(
     island_replicates,
     plot_plus_one = TRUE,
@@ -1173,3 +1128,495 @@ DAISIE_plot_sims <- function(
       type = type_here)
   }
 }
+
+#' Prepare input for DAISIE_stt
+#'
+#' @inheritParams default_params_doc
+#'
+#' @seealso \code{\link{DAISIE_plot_stt}}, \code{\link{DAISIE_plot_sims}}
+#' @return a list with wrangled data to be used for plotting STT plots with
+#' DAISIE_plot_stt
+#' @keywords internal
+DAISIE_convert_to_classic_plot <- function(simulation_outputs,
+                                           trait_pars = NULL) {
+  if (!is_simulation_outputs(simulation_outputs)) {
+    stop(
+      "'simulation_outputs' should be a set of simulation outputs. \n",
+      "Actual value: ", simulation_outputs
+    )
+  }
+  replicates <- length(simulation_outputs)
+  ### STT ALL species
+  s_freq <- length(simulation_outputs[[1]][[1]]$stt_all[, 1])
+  complete_arr <- array(dim = c(s_freq, 6, replicates))
+  for (x in 1:replicates) {
+    if(is.null(trait_pars)){
+      sum_endemics <- simulation_outputs[[x]][[1]]$stt_all[, "nA"] +
+        simulation_outputs[[x]][[1]]$stt_all[, "nC"]
+      total <- simulation_outputs[[x]][[1]]$stt_all[, "nA"] +
+        simulation_outputs[[x]][[1]]$stt_all[, "nC"] +
+        simulation_outputs[[x]][[1]]$stt_all[, "nI"]
+      complete_arr[, , x] <- cbind(simulation_outputs[[x]][[1]]$stt_all[, c("Time", "nI", "nA", "nC")],
+                                   sum_endemics,
+                                   total)
+    }else{
+      sum_endemics <- simulation_outputs[[x]][[1]]$stt_all[, "nA"] +
+        simulation_outputs[[x]][[1]]$stt_all[, "nC"] +
+        simulation_outputs[[x]][[1]]$stt_all[, "nA2"] +
+        simulation_outputs[[x]][[1]]$stt_all[, "nC2"]
+      total <- simulation_outputs[[x]][[1]]$stt_all[, "nA"] +
+        simulation_outputs[[x]][[1]]$stt_all[, "nC"] +
+        simulation_outputs[[x]][[1]]$stt_all[, "nI"] +
+        simulation_outputs[[x]][[1]]$stt_all[, "nA2"] +
+        simulation_outputs[[x]][[1]]$stt_all[, "nC2"] +
+        simulation_outputs[[x]][[1]]$stt_all[, "nI2"]
+      nI <- simulation_outputs[[x]][[1]]$stt_all[, "nI"] +
+        simulation_outputs[[x]][[1]]$stt_all[, "nI2"]
+      nA <- simulation_outputs[[x]][[1]]$stt_all[, "nA"] +
+        simulation_outputs[[x]][[1]]$stt_all[, "nA2"]
+      nC <- simulation_outputs[[x]][[1]]$stt_all[, "nC"] +
+        simulation_outputs[[x]][[1]]$stt_all[, "nC2"]
+      complete_arr[,,x]<-cbind(simulation_outputs[[x]][[1]]$stt_all[, 'Time'],
+                               nI,
+                               nA,
+                               nC,
+                               sum_endemics,
+                               total)
+    }
+  }
+  stt_average_all <- apply(complete_arr, c(1, 2), stats::median)
+  testit::assert(stt_average_all == DAISIE_extract_stt_median(
+    island_replicates = simulation_outputs,
+    trait_pars = trait_pars
+  ))
+  stt_q0.025_all <- apply(complete_arr, c(1, 2), stats::quantile, 0.025)
+  stt_q0.25_all <- apply(complete_arr, c(1, 2), stats::quantile, 0.25)
+  stt_q0.75_all <- apply(complete_arr, c(1, 2), stats::quantile, 0.75)
+  stt_q0.975_all <- apply(complete_arr, c(1, 2), stats::quantile, 0.975)
+  colnames(stt_average_all) <- c("Time", "nI", "nA", "nC", "Endemic", "Total")
+  colnames(stt_q0.025_all) <- c("Time", "nI", "nA", "nC", "Endemic", "Total")
+  colnames(stt_q0.25_all) <- c("Time", "nI", "nA", "nC", "Endemic", "Total")
+  colnames(stt_q0.75_all) <- c("Time", "nI", "nA", "nC", "Endemic", "Total")
+  colnames(stt_q0.975_all) <- c("Time", "nI", "nA", "nC", "Endemic", "Total")
+  all_species <- list(
+    stt_average = stt_average_all,
+    stt_q0.025 = stt_q0.025_all,
+    stt_q0.25 = stt_q0.25_all,
+    stt_q0.75 = stt_q0.75_all,
+    stt_q0.975 = stt_q0.975_all
+  )
+  if (is.null(simulation_outputs[[1]][[1]]$stt_type1) == FALSE) {
+    ### STT TYPE1
+    s_freq <- length(simulation_outputs[[1]][[1]]$stt_type1[, 1])
+    complete_arr <- array(dim = c(s_freq, 7, replicates))
+    for (x in 1:replicates) {
+      sum_endemics <- simulation_outputs[[x]][[1]]$stt_type1[, "nA"] +
+        simulation_outputs[[x]][[1]]$stt_type1[, "nC"]
+      total <- simulation_outputs[[x]][[1]]$stt_type1[, "nA"] +
+        simulation_outputs[[x]][[1]]$stt_type1[, "nC"] +
+        simulation_outputs[[x]][[1]]$stt_type1[, "nI"]
+      complete_arr[, , x] <- cbind(simulation_outputs[[x]][[1]]$stt_type1,
+                                   sum_endemics,
+                                   total)
+    }
+    stt_average_type1 <- apply(complete_arr, c(1, 2), stats::median)
+    stt_q0.025_type1 <- apply(complete_arr, c(1, 2), stats::quantile, 0.025)
+    stt_q0.25_type1 <- apply(complete_arr, c(1, 2), stats::quantile, 0.25)
+    stt_q0.75_type1 <- apply(complete_arr, c(1, 2), stats::quantile, 0.75)
+    stt_q0.975_type1 <- apply(complete_arr, c(1, 2), stats::quantile, 0.975)
+    colnames(stt_average_type1) <- c(
+      "Time",
+      "nI",
+      "nA",
+      "nC",
+      "present",
+      "Endemic",
+      "Total"
+    )
+    colnames(stt_q0.025_type1) <- c(
+      "Time",
+      "nI",
+      "nA",
+      "nC",
+      "present",
+      "Endemic",
+      "Total"
+    )
+    colnames(stt_q0.25_type1) <- c(
+      "Time",
+      "nI",
+      "nA",
+      "nC",
+      "present",
+      "Endemic",
+      "Total"
+    )
+    colnames(stt_q0.75_type1) <- c(
+      "Time",
+      "nI",
+      "nA",
+      "nC",
+      "present",
+      "Endemic",
+      "Total"
+    )
+    colnames(stt_q0.975_type1) <- c(
+      "Time",
+      "nI",
+      "nA",
+      "nC",
+      "present",
+      "Endemic",
+      "Total"
+    )
+    type1_species <- list(
+      stt_average = stt_average_type1,
+      stt_q0.025 = stt_q0.025_type1,
+      stt_q0.25 = stt_q0.25_type1,
+      stt_q0.75 = stt_q0.75_type1,
+      stt_q0.975 = stt_q0.975_type1
+    )
+    ### STT TYPE2
+    s_freq <- length(simulation_outputs[[1]][[1]]$stt_type2[, 1])
+    complete_arr <- array(dim = c(s_freq, 7, replicates))
+    for (x in 1:replicates) {
+      sum_endemics <- simulation_outputs[[x]][[1]]$stt_type2[, "nA"] +
+        simulation_outputs[[x]][[1]]$stt_type2[, "nC"]
+      total <- simulation_outputs[[x]][[1]]$stt_type2[, "nA"] +
+        simulation_outputs[[x]][[1]]$stt_type2[, "nC"] +
+        simulation_outputs[[x]][[1]]$stt_type2[, "nI"]
+      complete_arr[, , x] <- cbind(
+        simulation_outputs[[x]][[1]]$stt_type2,
+        sum_endemics,
+        total
+      )
+    }
+    stt_average_type2 <- apply(complete_arr, c(1, 2), stats::median)
+    stt_q0.025_type2 <- apply(complete_arr, c(1, 2), stats::quantile, 0.025)
+    stt_q0.25_type2 <- apply(complete_arr, c(1, 2), stats::quantile, 0.25)
+    stt_q0.75_type2 <- apply(complete_arr, c(1, 2), stats::quantile, 0.75)
+    stt_q0.975_type2 <- apply(complete_arr, c(1, 2), stats::quantile, 0.975)
+    colnames(stt_average_type2) <- c(
+      "Time",
+      "nI",
+      "nA",
+      "nC",
+      "present",
+      "Endemic",
+      "Total"
+    )
+    colnames(stt_q0.025_type2) <- c(
+      "Time",
+      "nI",
+      "nA",
+      "nC",
+      "present",
+      "Endemic",
+      "Total"
+    )
+    colnames(stt_q0.25_type2) <- c(
+      "Time",
+      "nI",
+      "nA",
+      "nC",
+      "present",
+      "Endemic",
+      "Total"
+    )
+    colnames(stt_q0.75_type2) <- c(
+      "Time",
+      "nI",
+      "nA",
+      "nC",
+      "present",
+      "Endemic",
+      "Total"
+    )
+    colnames(stt_q0.975_type2) <- c(
+      "Time",
+      "nI",
+      "nA",
+      "nC",
+      "present",
+      "Endemic",
+      "Total"
+    )
+    type2_species <- list(
+      stt_average = stt_average_type2,
+      stt_q0.025 = stt_q0.025_type2,
+      stt_q0.25 = stt_q0.25_type2,
+      stt_q0.75 = stt_q0.75_type2,
+      stt_q0.975 = stt_q0.975_type2
+    )
+    return(list(
+      all_species = all_species,
+      type1_species = type1_species,
+      type2_species = type2_species
+    )
+    )
+  } else {
+    return(list(
+      all_species = all_species,
+      type1_species = NULL,
+      type2_species = NULL)
+    )
+  }
+}
+
+#' Create the Species-Through-Time plot. This is used to visualize
+#' the output of DAISIE_sim functions
+#'
+#' @inheritParams default_params_doc
+#'
+#' @keywords internal
+DAISIE_plot_stt <- function(
+    plot_plus_one = TRUE,
+    time,
+    plot_lists = plot_lists,
+    type = type
+) {
+  # Plot the y axis iff plus one
+  y_axis_type <- "n"
+  y_axis_label <- "No of species"
+  if (plot_plus_one == TRUE) {
+    y_axis_type <- "s"
+    y_axis_label <- "No of species + 1"
+  }
+  stt <- plot_lists[[type]]
+  if (is.null(stt)) {
+    return()
+  }
+  suppressWarnings(
+    graphics::plot(
+      NULL, NULL, xlim = rev(c(0, time)), ylim = c(1, max(stt$stt_q0.975)),
+      ylab = y_axis_label,
+      bty = "l", xaxs = "i", xlab = "Time before present",
+      main = "Species-through-time - All species",
+      log = "y", cex.lab = 1.2, cex.main = 1.2, cex.axis = 1.2,
+      yaxt = y_axis_type
+    )
+  )
+  graphics::polygon(c(stt$stt_average[, "Time"], rev(stt$stt_average[, "Time"])), c(stt$stt_q0.025[, "Total"] +
+                                                                                      1, rev(stt$stt_q0.975[, "Total"] + 1)), col = "light grey", border = NA)
+  graphics::polygon(c(stt$stt_average[, "Time"], rev(stt$stt_average[, "Time"])), c(stt$stt_q0.25[, "Total"] +
+                                                                                      1, rev(stt$stt_q0.75[, "Total"] + 1)), col = "dark grey", border = NA)
+  graphics::lines(stt$stt_average[, "Time"], stt$stt_average[, "Total"] + 1, lwd = 2)
+  graphics::lines(stt$stt_average[, "Time"], stt$stt_average[, "nI"] + 1, lwd = 2, col = "cyan3")
+  graphics::lines(stt$stt_average[, "Time"], stt$stt_average[, "Endemic"] + 1, lwd = 2, col = "dodgerblue1")
+  legend_names <- c("Total", "Non-endemic", "Endemic")
+  legend_colors <- c("black", "cyan3", "dodgerblue1")
+  graphics::legend(
+    time, max(stt$stt_q0.975), legend_names, lty = 1, lwd = 2,
+    col = legend_colors, cex = 1.2, border = NA, bty = "n"
+  )
+  if (plot_plus_one == FALSE) {
+    y_axis_values <- c(1, 2, 5, 10, 20, 50, 100, 200, 500, 1000)
+    graphics::axis(2, at = y_axis_values, labels = y_axis_values - 1)
+  }
+}
+
+#' Extract the STT median from the output of DAISIE_sim functions
+#'
+#' @inheritParams default_params_doc
+#'
+#' @return a matrix (?)
+#' @keywords internal
+DAISIE_extract_stt_median <- function(
+    island_replicates,
+    trait_pars = NULL) {
+
+  replicates <- length(island_replicates)
+  time <- max(island_replicates[[1]][[1]]$stt_all[, 1])
+  ### STT ALL species
+  s_freq <- length(island_replicates[[1]][[1]]$stt_all[, 1])
+  complete_arr <- array(dim = c(s_freq, 6, replicates))
+  for (x in 1:replicates) {
+
+    if(is.null(trait_pars)){
+      sum_endemics <- island_replicates[[x]][[1]]$stt_all[, "nA"] +
+        island_replicates[[x]][[1]]$stt_all[, "nC"]
+      total <- island_replicates[[x]][[1]]$stt_all[, "nA"] +
+        island_replicates[[x]][[1]]$stt_all[, "nC"] +
+        island_replicates[[x]][[1]]$stt_all[, "nI"]
+      complete_arr[, , x] <- cbind(
+        island_replicates[[x]][[1]]$stt_all[, c("Time", "nI", "nA", "nC")],
+        sum_endemics,
+        total)
+    }else{
+      sum_endemics <- island_replicates[[x]][[1]]$stt_all[, "nA"] +
+        island_replicates[[x]][[1]]$stt_all[, "nC"] +
+        island_replicates[[x]][[1]]$stt_all[, "nA2"] +
+        island_replicates[[x]][[1]]$stt_all[, "nC2"]
+      total <- island_replicates[[x]][[1]]$stt_all[, "nA"] +
+        island_replicates[[x]][[1]]$stt_all[, "nC"] +
+        island_replicates[[x]][[1]]$stt_all[, "nI"] +
+        island_replicates[[x]][[1]]$stt_all[, "nA2"] +
+        island_replicates[[x]][[1]]$stt_all[, "nC2"] +
+        island_replicates[[x]][[1]]$stt_all[, "nI2"]
+      nI <- island_replicates[[x]][[1]]$stt_all[, "nI"] +
+        island_replicates[[x]][[1]]$stt_all[, "nI2"]
+      nA <- island_replicates[[x]][[1]]$stt_all[, "nA"] +
+        island_replicates[[x]][[1]]$stt_all[, "nA2"]
+      nC <- island_replicates[[x]][[1]]$stt_all[, "nC"] +
+        island_replicates[[x]][[1]]$stt_all[, "nC2"]
+      complete_arr[,,x]<-cbind(island_replicates[[x]][[1]]$stt_all[, 'Time'],
+                               nI,
+                               nA,
+                               nC,
+                               sum_endemics,
+                               total)
+    }
+  }
+  stt_average_all <- apply(complete_arr, c(1, 2), stats::median)
+  colnames(stt_average_all) <- c("Time", "nI", "nA", "nC", "Endemic", "Total")
+  return(stt_average_all)
+}
+
+DAISIE_format_CS_trait <- function(island_replicates,
+                                   time,
+                                   M,
+                                   sample_freq,
+                                   verbose = TRUE,
+                                   trait_pars = NULL)
+{
+  total_time <- time
+  several_islands <- list()
+
+  for(rep in 1:length(island_replicates))
+  {
+    full_list <- island_replicates[[rep]]
+    stac_vec <- unlist(full_list)[which(names(unlist(full_list)) == "stac")]
+    number_not_present <- length(which(stac_vec == 0))
+    present <- which(stac_vec!=0)
+    number_present <- length(present)
+    type_vec <- unlist(full_list)[which(names(unlist(full_list)) == "type1or2")]
+    prop_type2_pool <- length(which(type_vec == 2)) / M
+
+    number_type2_cols <- length(which(match(which(stac_vec != 0),which(type_vec == 2)) > 0))
+    number_type1_cols <- number_present-number_type2_cols
+
+    island_list <- list()
+    for(i in 1:(number_present + 1))
+    {
+      island_list[[i]] = list()
+    }
+
+    ### all species
+    stt_list = list()
+    for(i in 1:(M + trait_pars$M2))
+    {
+      stt_list[[i]] = full_list[[i]]$stt_table
+    }
+    stt_all = matrix(ncol = 8,nrow = sample_freq + 1)
+
+    colnames(stt_all) = c("Time","nI","nA","nC","nI2","nA2","nC2","present")
+    stt_all[,"Time"] = rev(seq(from = 0,to = total_time,length.out = sample_freq + 1))
+
+    ####
+    immig_spec <- c()
+    ana_spec <- c()
+    immig_spec2 <- c()
+    ana_spec2 <- c()
+    for (i in 1:(M + trait_pars$M2)) {
+      immig_spec[i] <- sum(full_list[[i]]$stt_table[1, 2])
+      ana_spec[i] <- sum(full_list[[i]]$stt_table[1, 3])
+      immig_spec2[i] <- sum(full_list[[i]]$stt_table[1, 5])
+      ana_spec2[i] <- sum(full_list[[i]]$stt_table[1, 6])
+    }
+    immig_spec <- sum(immig_spec)
+    ana_spec <- sum(ana_spec)
+    immig_spec2 <- sum(immig_spec2)
+    ana_spec2 <- sum(ana_spec2)
+    init_present <- immig_spec + ana_spec + immig_spec2 + ana_spec2
+    stt_all[1, 2:8] <- c(immig_spec, ana_spec, 0, immig_spec2, ana_spec2, 0, init_present)
+
+    ####
+    for(i in 2:nrow(stt_all))
+    {
+      the_age = stt_all[i,"Time"]
+      store_richness_time_slice = matrix(nrow = M + trait_pars$M2,ncol = 6)
+      colnames(store_richness_time_slice) = c("I","A","C","I2","A2","C2")
+      for(x in 1:(M + trait_pars$M2))
+      {
+        # testit::assert(x >= 1)
+        # testit::assert(x <= length(stt_list))
+        # testit::assert("Time" %in% colnames(stt_list[[x]]))
+        store_richness_time_slice[x,] = stt_list[[x]][max(which(stt_list[[x]][,"Time"] >= the_age)),2:7]
+      }
+      count_time_slice = store_richness_time_slice[,1] +
+        store_richness_time_slice[,2] +
+        store_richness_time_slice[,3] +
+        store_richness_time_slice[,4] +
+        store_richness_time_slice[,5] +
+        store_richness_time_slice[,6]
+      present_time_slice = rep(0, M + trait_pars$M2)
+      present_time_slice[which(count_time_slice>0)] = 1
+      store_richness_time_slice = cbind(store_richness_time_slice,present_time_slice)
+      stt_all[i,c(2:8)] = apply(store_richness_time_slice,2,sum)
+    }
+
+    island_list[[1]] = list(
+      island_age = total_time,
+      not_present = number_not_present,
+      stt_all = stt_all
+    )
+
+
+    if(number_present > 0)
+    {
+      for(i in 1:number_present)
+      {
+        island_list[[1 + i]] = full_list[[present[i]]]
+        island_list[[1 + i]]$stt_table = NULL
+      }
+    }
+
+    if(number_present == 0)
+    {
+      island_list = list()
+      island_list[[1]] = list(island_age = total_time,not_present = M, stt_all = stt_all)
+
+    }
+
+    several_islands[[rep]] = island_list
+    if (verbose == TRUE) {
+      message(
+        "Island being formatted: ", rep, "/", length(island_replicates)
+      )
+    }
+  }
+  return(several_islands)
+}
+
+
+#' Measures if the input is a valid collection of simulation
+#' outputs.
+#'
+#' @inheritParams default_params_doc
+#'
+#' @return TRUE if the input is a valid collection of simulation
+#' outputs.
+#' @author Richel J.C Bilderbeek, Pedro Neves
+#' @keywords internal
+is_simulation_outputs <- function(simulation_outputs) {
+  for (n_replicate in seq_along(simulation_outputs)) {
+    if (!"island_age" %in% names(simulation_outputs[[n_replicate]][[1]]))
+      return(FALSE)
+    if (!(names(simulation_outputs[[n_replicate]][[1]])[2] %in%
+          c("not_present","not_present_type1"))) {
+      return(FALSE)
+    }
+    if (!"stt_all" %in% names(simulation_outputs[[n_replicate]][[1]]))
+      return(FALSE)
+    # TODO: Figure out how to test this?
+    # if (!"branching_times" %in% names(simulation_outputs)) return(FALSE)
+    # if (!"stac" %in% names(simulation_outputs)) return(FALSE)
+    # if (!"missing_species" %in% names(simulation_outputs)) return(FALSE)
+  }
+  if (is.list(simulation_outputs) && length(simulation_outputs) >= 1) {
+    return(TRUE)
+  }
+}
+
+
+

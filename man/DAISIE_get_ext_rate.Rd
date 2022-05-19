@@ -61,7 +61,6 @@ Proceedings of the Royal Society of London B: Biological Sciences 281.1784
 Other rate calculations: 
 \code{\link{DAISIE_get_ana_rate}()},
 \code{\link{DAISIE_get_immig_rate}()},
-\code{\link{DAISIE_island_area}()},
 \code{\link{DAISIE_update_rates_trait}()}
 }
 \author{

@@ -37,14 +37,6 @@ execute_time_loop(
 \item{mainland_n}{number of species on mainland}
 
 \item{trait_pars_R}{trait pars}
-
-\item{num_spec}{number of species}
-
-\item{num_immigrants}{number of immigrants}
-
-\item{maxspecID}{maxpsecid}
-
-\item{mainland_spec_R}{mainland spec}
 }
 \value{
 list with stt_table and island_spec

@@ -28,14 +28,7 @@ DAISIE_update_rates_trait <- function(timeval,
                                island_spec = NULL) {
   # Function to calculate rates at time = timeval. Returns list with each rate.
 
-  A <- island_area(
-    timeval = timeval,
-    total_time = total_time,
-    area_pars = area_pars,
-    peak = peak,
-    island_ontogeny = island_ontogeny,
-    sea_level = sea_level
-  )
+  A <- 1
 
   immig_rate <- DAISIE_get_immig_rate(
     gam = gam,
@@ -94,75 +87,7 @@ DAISIE_update_rates_trait <- function(timeval,
 
   return(rates)
 }
-#' Function to describe changes in area through time.
-#'
-#' @inheritParams default_params_doc
-#'
-#' @export
-#' @family rate calculations
-#' @author Pedro Neves, Joshua Lambert
-#' @references
-#' Valente, Luis M., Rampal S. Etienne, and Albert B. Phillimore.
-#' "The effects of island ontogeny on species diversity and phylogeny."
-#' Proceedings of the Royal Society of London B: Biological
-#' Sciences 281.1784 (2014): 20133227.
-DAISIE_island_area <- function(timeval,
-                        total_time,
-                        area_pars,
-                        peak,
-                        island_ontogeny,
-                        sea_level) {
-  # testit::assert(are_area_pars(area_pars))
-  Tmax <- area_pars$total_island_age
-  Amax <- area_pars$max_area
-  Acurr <- area_pars$current_area
-  proptime_max <- area_pars$proportional_peak_t
-  ampl <- area_pars$sea_level_amplitude
-  freq <- area_pars$sea_level_frequency
-  theta <- area_pars$island_gradient_angle
-  proptime <- timeval / Tmax
-  proptime_curr <- total_time / Tmax
-  theta <- theta * (pi / 180)
-  # Constant ontogeny and sea-level
-  if (island_ontogeny == 0 & sea_level == 0) {
-    if (Amax != 1 || is.null(Amax)) {
-      warning("Constant island area requires a maximum area of 1.")
-    }
-    return(1)
-  }
 
-  # Beta function ontogeny and constant sea-level
-  if (island_ontogeny == 1 & sea_level == 0) {
-    At <- calc_Abeta(proptime = proptime,
-                     proptime_max = proptime_max,
-                     peak = peak,
-                     Amax = Amax)
-    return(At)
-  }
-
-  if (island_ontogeny == 0 & sea_level == 1) {
-    angular_freq <- 2 * pi * freq
-    delta_sl <- ampl * cos((proptime_curr - proptime) * angular_freq)
-    r_curr <- sqrt((Acurr) / pi)
-    h_curr <- tan(theta) * r_curr
-    h_delta <- max(0, h_curr - ampl + delta_sl)
-    At <- pi * (h_delta / tan(theta)) ^ 2
-    return(At)
-  }
-  if (island_ontogeny == 1 && sea_level == 1) {
-    A_beta <- calc_Abeta(proptime,
-                         proptime_max,
-                         peak,
-                         Amax)
-    angular_freq <- 2 * pi * freq
-    delta_sl <- ampl * cos((proptime_curr - proptime) * angular_freq)
-    r_curr <- sqrt(A_beta / pi)
-    h_curr <- tan(theta) * r_curr
-    h_delta <- max(0, h_curr - ampl + delta_sl)
-    At <- pi * (h_delta / tan(theta)) ^ 2
-    return(At)
-  }
-}
 
 #' Function to describe changes in extinction rate through time.
 #'
@@ -217,7 +142,7 @@ DAISIE_get_ana_rate <- function(laa,
                          island_spec = NULL,
                          trait_pars = NULL) {
 
-  if(is.null(trait_pars)){
+  if (is.null(trait_pars)) {
     ana_rate <- laa * num_immigrants
     return(ana_rate)
   }else{

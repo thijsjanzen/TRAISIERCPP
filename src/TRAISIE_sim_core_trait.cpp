@@ -44,12 +44,8 @@ int update_num_immigrants(const island_spec& is) {
 //' @param mu extinction rate
 //' @param area_pars_from_R area pars
 //' @param K K
-//' @param num_spec number of species
-//' @param num_immigrants number of immigrants
 //' @param mainland_n number of species on mainland
-//' @param maxspecID maxpsecid
 //' @param trait_pars_R trait pars
-//' @param mainland_spec_R mainland spec
 //' @return list with stt_table and island_spec
 //' @export
 // [[Rcpp::export]]

@@ -18,9 +18,6 @@ Named list with hyperparameters
 \description{
 Create list of hyperparameters
 }
-\examples{
-hyper_pars <- create_hyper_pars(d = 0.027, x = 0.15)
-}
 \author{
 Pedro Neves, Joshua Lambert
 }

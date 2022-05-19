@@ -6,6 +6,9 @@
 \usage{
 sample_event(event_prob)
 }
+\arguments{
+\item{event_prob}{event probability vector}
+}
 \value{
 event
 }

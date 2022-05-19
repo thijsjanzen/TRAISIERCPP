@@ -62,25 +62,6 @@ types of species for the entire time span the islands were simulated.
 2.5-97.5th percentiles are plotted in light grey, 25-75th percentiles
 plotted in dark grey.
 }
-\examples{
-
-
-### Plot islands with single process (only one type of species)
-utils::data(islands_1type_1000reps)
-DAISIE_plot_sims(
-  island_replicates = islands_1type_1000reps
-  )
-
-
-### Plot island with type 1 and type 2
-utils::data(islands_2types_1000reps)
-DAISIE_plot_sims(
-  island_replicates = islands_2types_1000reps
-  )
-
-
-
-}
 \references{
 Valente, L.M., A.B. Phillimore and R.S. Etienne (2015).
 Equilibrium and non-equilibrium dynamics simultaneously operate in the

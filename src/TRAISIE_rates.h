@@ -98,7 +98,7 @@ struct rates {
 };
 
 //' function to draw event.
-//' @param event_prob
+//' @param event_prob event probability vector
 //' @return event
 //' @export
 // [[Rcpp::export]]
