@@ -1,5 +1,4 @@
-Sys.setenv(R_TESTS = "")
 library(testthat)
-library(Traisie-ABC)
+library(TRAISIERCPP) # nolint
 
-test_check("Traisie-ABC")
+test_check("TRAISIERCPP")

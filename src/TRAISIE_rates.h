@@ -51,32 +51,11 @@ struct rates {
            ext_rate + ext_rate2 +
            ana_rate + ana_rate2 +
            clado_rate + clado_rate2 +
-           trans_rate + trans_rate2 +
-           M2;
-    // should also add M2?
+           trans_rate + trans_rate2;
   }
 
   int sample_event() {
-     std::vector<double> event_prob = {immig_rate, ext_rate,
-                                                   ana_rate, clado_rate,
-                                                   trans_rate, immig_rate2,
-                                                   ext_rate2, ana_rate2,
-                                                   clado_rate2,
-                                                   trans_rate2};
 
-    double s = std::accumulate(event_prob.begin(), event_prob.end(), 0.0);
-    double r = R::runif(0.0, s);
-    int index = 0;
-
-    for( ; index < event_prob.size(); ++index) {
-      r -= event_prob[index];
-      if (r <= 0.0) {
-        break;
-      }
-    }
-    return index + 1;
-
-  //  return event_prob(rndgen) + 1; // +1 to conform to R indexing style
   }
 
   rates(two_rates immig,
@@ -118,15 +97,42 @@ struct rates {
   }
 };
 
+//' function to draw event.
+//' @param event_prob
+//' @return event
+//' @export
+// [[Rcpp::export]]
+int sample_event(const std::vector<double>& event_prob) {
+/*  std::vector<double> event_prob = {immig_rate, ext_rate,
+                                    ana_rate, clado_rate,
+                                    trans_rate, immig_rate2,
+                                    ext_rate2, ana_rate2,
+                                    clado_rate2,
+                                    trans_rate2};
+  */
+  double s = std::accumulate(event_prob.begin(), event_prob.end(), 0.0);
+  double r = R::runif(0.0, s);
+  int index = 0;
+
+  for( ; index < event_prob.size(); ++index) {
+    r -= event_prob[index];
+    if (r <= 0.0) {
+      break;
+    }
+  }
+  return index + 1;
+}
+
 two_rates get_immig_rate(double gam,
                          double A,
                          int num_spec,
                          double K,
                          double mainland_n,
-                         const rates& trait_pars) {
+                         double mainland_n2,
+                         double gam2) {
 
-  auto mainland_n2 = trait_pars.M2;
-  auto gam2 = trait_pars.immig_rate2;
+ // auto mainland_n2 = trait_pars.M2;
+//  auto gam2 = trait_pars.immig_rate2;
 
   two_rates immig_rate;
   immig_rate.rate1 = std::max(mainland_n * gam * (1.0 - (num_spec / (A * K))),
@@ -136,6 +142,33 @@ two_rates get_immig_rate(double gam,
 
   return immig_rate;
 }
+
+//' function to test get_immigration_rate
+//' @param gam gam
+//' @param A A
+//' @param num_spec num species
+//' @param K K value
+//' @param mainland_n num mainland species trait 1
+//' @param mainland_n2 num mainland species trait 2
+//' @param immig_rate2 gam2
+//' @return two rates
+//' @export
+// [[Rcpp::export]]
+Rcpp::NumericVector test_get_immig_rate(double gam,
+                                        double A,
+                                        int num_spec,
+                                        double K,
+                                        double mainland_n,
+                                        double mainland_n2,
+                                        double immig_rate2) {
+  auto answer = get_immig_rate(gam, A, num_spec, K, mainland_n,
+                               mainland_n2, immig_rate2);
+  Rcpp::NumericVector out = {answer.rate1, answer.rate2};
+  return out;
+}
+
+
+
 
 two_rates get_ext_rate(double mu,
                        int num_spec,
@@ -226,7 +259,8 @@ rates update_rates(double timeval,
   }
 
   two_rates immig_rate = get_immig_rate(gam, A, num_spec, K, mainland_n,
-                                        trait_pars);
+                                        trait_pars.M2,
+                                        trait_pars.immig_rate2);
 
   two_rates ext_rate = get_ext_rate(mu, num_spec, A,
                                     trait_pars,

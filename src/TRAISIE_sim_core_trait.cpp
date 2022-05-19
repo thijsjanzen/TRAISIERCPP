@@ -13,7 +13,7 @@
 double calc_next_time_eval(const rates& r,
                            double timeval) {
   double s = r.sum();
-  double dt = R::rexp(s);
+  double dt = R::rexp(1.0 / s);
 
   return timeval + dt;
 }
@@ -111,7 +111,19 @@ Rcpp::List execute_time_loop(double timeval,
   //  Rcpp::Rcout << timeval << "\n";
 
     if (timeval < total_time) {
-      auto possible_event = all_rates.sample_event();
+      int possible_event = sample_event({all_rates.immig_rate,
+                                        all_rates.ext_rate,
+                                        all_rates.ana_rate,
+                                        all_rates.clado_rate,
+                                        all_rates.trans_rate,
+                                        all_rates.immig_rate2,
+                                        all_rates.ext_rate2,
+                                        all_rates.ana_rate2,
+                                        all_rates.clado_rate2,
+                                        all_rates.trans_rate2});
+
+
+    //  auto possible_event = all_rates.sample_event();
    //   Rcpp::Rcout << possible_event << "\n";
 
       DAISIE_sim_update_state_trait_dep(timeval,
