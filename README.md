@@ -1,6 +1,6 @@
 # TRAISIERCPP
 
-[![R-CMD-check](https://github.com/thijsjanzen/TRAISIERCPP/workflows/R-CMD-check/badge.svg)](https://github.com/thijsjanzen/TRAISIERCPP/actions)
+[![R-CMD-check](https://github.com/thijsjanzen/TRAISIERCPP/workflows/R/badge.svg)](https://github.com/thijsjanzen/TRAISIERCPP/actions)
 
 Branch | Coverage
 ---|---
