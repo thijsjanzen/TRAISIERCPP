@@ -8,3 +8,4 @@ src/*.dll
 *.o
 *.o
 *.so
+.Rproj.user/A8F3D4C9/cpp-definition-cache
