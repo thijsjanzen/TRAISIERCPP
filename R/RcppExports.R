@@ -23,6 +23,19 @@ test_get_immig_rate <- function(gam, A, num_spec, K, mainland_n, mainland_n2, im
     .Call('_TRAISIERCPP_test_get_immig_rate', PACKAGE = 'TRAISIERCPP', gam, A, num_spec, K, mainland_n, mainland_n2, immig_rate2)
 }
 
+#' function to test get_ext_rate
+#' @param mu mu
+#' @param num_spec num species
+#' @param A A
+#' @param ext_rate2 ext_rate2
+#' @param num_spec_trait1 num_spec trait 1
+#' @param num_spec_trait2 num_spec trait 2
+#' @return two rates
+#' @export
+test_get_ext_rate <- function(mu, num_spec, A, ext_rate2, num_spec_trait1, num_spec_trait2) {
+    .Call('_TRAISIERCPP_test_get_ext_rate', PACKAGE = 'TRAISIERCPP', mu, num_spec, A, ext_rate2, num_spec_trait1, num_spec_trait2)
+}
+
 #' CPP function to execute expensive loop
 #' @param timeval timeval
 #' @param total_time total time
