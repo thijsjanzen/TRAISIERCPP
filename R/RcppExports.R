@@ -79,13 +79,32 @@ test_get_clado_rate <- function(lac, num_spec, K, A, clado_rate2, num_spec_trait
 }
 
 #' function to test get_trans_rate
-#' @param trans_rate
-#' @param trans_rate2
+#' @param trans_rate tr1
+#' @param trans_rate2 tr2
 #' @param num_spec_trait1 num_spec trait 1
 #' @param num_spec_trait2 num_spec trait 2
 #' @return two rates
 #' @export
 test_get_trans_rate <- function(trans_rate, trans_rate2, num_spec_trait1, num_spec_trait2) {
     .Call('_TRAISIERCPP_test_get_trans_rate', PACKAGE = 'TRAISIERCPP', trans_rate, trans_rate2, num_spec_trait1, num_spec_trait2)
+}
+
+#' function to test get_trans_rate
+#' @param timeval timeval
+#' @param total_time total time
+#' @param gam gam
+#' @param laa laa
+#' @param lac lac
+#' @param mu mu
+#' @param K K
+#' @param num_spec num_spec
+#' @param num_immigrants num_immigrants
+#' @param mainland_n mainland_n
+#' @param island_spec island_spec
+#' @param trait_pars trait pars
+#' @return two rates
+#' @export
+test_update_rates <- function(timeval, total_time, gam, laa, lac, mu, K, num_spec, num_immigrants, mainland_n, island_spec_R, trait_pars_R) {
+    .Call('_TRAISIERCPP_test_update_rates', PACKAGE = 'TRAISIERCPP', timeval, total_time, gam, laa, lac, mu, K, num_spec, num_immigrants, mainland_n, island_spec_R, trait_pars_R)
 }
 

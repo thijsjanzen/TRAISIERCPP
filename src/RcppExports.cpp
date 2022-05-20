@@ -119,6 +119,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// test_update_rates
+Rcpp::NumericVector test_update_rates(double timeval, double total_time, double gam, double laa, double lac, double mu, double K, double num_spec, double num_immigrants, double mainland_n, const Rcpp::NumericMatrix& island_spec_R, const Rcpp::List& trait_pars_R);
+RcppExport SEXP _TRAISIERCPP_test_update_rates(SEXP timevalSEXP, SEXP total_timeSEXP, SEXP gamSEXP, SEXP laaSEXP, SEXP lacSEXP, SEXP muSEXP, SEXP KSEXP, SEXP num_specSEXP, SEXP num_immigrantsSEXP, SEXP mainland_nSEXP, SEXP island_spec_RSEXP, SEXP trait_pars_RSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type timeval(timevalSEXP);
+    Rcpp::traits::input_parameter< double >::type total_time(total_timeSEXP);
+    Rcpp::traits::input_parameter< double >::type gam(gamSEXP);
+    Rcpp::traits::input_parameter< double >::type laa(laaSEXP);
+    Rcpp::traits::input_parameter< double >::type lac(lacSEXP);
+    Rcpp::traits::input_parameter< double >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< double >::type K(KSEXP);
+    Rcpp::traits::input_parameter< double >::type num_spec(num_specSEXP);
+    Rcpp::traits::input_parameter< double >::type num_immigrants(num_immigrantsSEXP);
+    Rcpp::traits::input_parameter< double >::type mainland_n(mainland_nSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type island_spec_R(island_spec_RSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List& >::type trait_pars_R(trait_pars_RSEXP);
+    rcpp_result_gen = Rcpp::wrap(test_update_rates(timeval, total_time, gam, laa, lac, mu, K, num_spec, num_immigrants, mainland_n, island_spec_R, trait_pars_R));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_TRAISIERCPP_sample_event", (DL_FUNC) &_TRAISIERCPP_sample_event, 1},
@@ -128,6 +150,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_TRAISIERCPP_test_get_ana_rate", (DL_FUNC) &_TRAISIERCPP_test_get_ana_rate, 5},
     {"_TRAISIERCPP_test_get_clado_rate", (DL_FUNC) &_TRAISIERCPP_test_get_clado_rate, 7},
     {"_TRAISIERCPP_test_get_trans_rate", (DL_FUNC) &_TRAISIERCPP_test_get_trans_rate, 4},
+    {"_TRAISIERCPP_test_update_rates", (DL_FUNC) &_TRAISIERCPP_test_update_rates, 12},
     {NULL, NULL, 0}
 };
 

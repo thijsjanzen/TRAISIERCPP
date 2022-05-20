@@ -7,6 +7,10 @@
 test_get_trans_rate(trans_rate, trans_rate2, num_spec_trait1, num_spec_trait2)
 }
 \arguments{
+\item{trans_rate}{tr1}
+
+\item{trans_rate2}{tr2}
+
 \item{num_spec_trait1}{num_spec trait 1}
 
 \item{num_spec_trait2}{num_spec trait 2}

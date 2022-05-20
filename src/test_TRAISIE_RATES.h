@@ -96,8 +96,8 @@ Rcpp::NumericVector test_get_clado_rate(double lac,
 }
 
 //' function to test get_trans_rate
-//' @param trans_rate
-//' @param trans_rate2
+//' @param trans_rate tr1
+//' @param trans_rate2 tr2
 //' @param num_spec_trait1 num_spec trait 1
 //' @param num_spec_trait2 num_spec trait 2
 //' @return two rates
@@ -113,4 +113,80 @@ Rcpp::NumericVector test_get_trans_rate(double trans_rate,
   Rcpp::NumericVector out = {answer.rate1, answer.rate2};
   return out;
 }
+
+
+//' function to test get_trans_rate
+//' @param timeval timeval
+//' @param total_time total time
+//' @param gam gam
+//' @param laa laa
+//' @param lac lac
+//' @param mu mu
+//' @param K K
+//' @param num_spec num_spec
+//' @param num_immigrants num_immigrants
+//' @param mainland_n mainland_n
+//' @param island_spec island_spec
+//' @param trait_pars trait pars
+//' @return two rates
+//' @export
+// [[Rcpp::export]]
+Rcpp::NumericVector test_update_rates(double timeval,
+                                      double total_time,
+                                      double gam,
+                                      double laa,
+                                      double lac,
+                                      double mu,
+                                      double K,
+                                      double num_spec,
+                                      double num_immigrants,
+                                      double mainland_n,
+                                      const Rcpp::NumericMatrix& island_spec_R,
+                                      const Rcpp::List& trait_pars_R) {
+
+  island_spec island_spec_;
+  for (size_t i = 0; i < island_spec_R.nrow(); ++i) {
+    double colonist = island_spec_R(i, 0);
+    double timeval  = island_spec_R(i, 1);
+    double trait_val = island_spec_R(i, 7);
+
+    island_spec_row to_add(colonist, timeval, species_type::I, trait_val);
+    island_spec_.push_back(to_add);
+  }
+
+  rates trait_pars(gam, laa, lac, mu, trait_pars_R);
+
+  auto answer = update_rates(timeval,
+                             total_time,
+                             gam,
+                             laa,
+                             lac,
+                             mu,
+                             K,
+                             num_spec,
+                             num_immigrants,
+                             mainland_n,
+                             island_spec_,
+                             trait_pars);
+
+  Rcpp::NumericVector out = {answer.immig_rate,
+                             answer.ext_rate,
+                             answer.ana_rate,
+                             answer.clado_rate,
+                             answer.trans_rate,
+                             answer.immig_rate2,
+                             answer.ext_rate2,
+                             answer.ana_rate2,
+                             answer.clado_rate2,
+                             answer.trans_rate2,
+                             answer.M2};
+  return out;
+}
+
+
+
+
+
+
+
 
