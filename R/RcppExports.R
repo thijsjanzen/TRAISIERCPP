@@ -48,6 +48,20 @@ test_get_ana_rate <- function(laa, num_immigrants, ana_rate2, num_spec_trait1, n
     .Call('_TRAISIERCPP_test_get_ana_rate', PACKAGE = 'TRAISIERCPP', laa, num_immigrants, ana_rate2, num_spec_trait1, num_spec_trait2)
 }
 
+#' function to test get_ext_rate
+#' @param lac caldo rate trait 1
+#' @param num_spec number of immigrants
+#' @param K K
+#' @param A A
+#' @param clado_rate2 clado rate trait 2
+#' @param num_spec_trait1 num_spec trait 1
+#' @param num_spec_trait2 num_spec trait 2
+#' @return two rates
+#' @export
+test_get_clado_rate <- function(lac, num_spec, K, A, clado_rate2, num_spec_trait1, num_spec_trait2) {
+    .Call('_TRAISIERCPP_test_get_clado_rate', PACKAGE = 'TRAISIERCPP', lac, num_spec, K, A, clado_rate2, num_spec_trait1, num_spec_trait2)
+}
+
 #' CPP function to execute expensive loop
 #' @param timeval timeval
 #' @param total_time total time

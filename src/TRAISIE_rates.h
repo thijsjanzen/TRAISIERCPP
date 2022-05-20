@@ -171,7 +171,7 @@ two_rates get_clado_rate(double lac,
                          double num_spec,
                          double K,
                          double A,
-                         const rates& trait_pars,
+                         double clado_rate2,
                          size_t num_spec_trait1,
                          size_t num_spec_trait2) {
 
@@ -180,7 +180,7 @@ two_rates get_clado_rate(double lac,
                               lac * num_spec_trait1 * (1.0 - num_spec / K) );
 
   clado_rate.rate2 = std::max(0.0,
-                              trait_pars.clado_rate2 * num_spec_trait2 * (1.0 - num_spec / K));
+                              clado_rate2 * num_spec_trait2 * (1.0 - num_spec / K));
   return clado_rate;
 }
 
@@ -240,7 +240,7 @@ rates update_rates(double timeval,
                                     num_immig_trait1,
                                     num_immig_trait2);
   two_rates clado_rate = get_clado_rate(lac, num_spec, K, A,
-                                        trait_pars,
+                                        trait_pars.clado_rate2,
                                         num_spec_trait1,
                                         num_spec_trait2);
   two_rates trans_rate = get_trans_rate(trait_pars,
@@ -323,6 +323,33 @@ Rcpp::NumericVector test_get_ana_rate(double laa,
   Rcpp::NumericVector out = {answer.rate1, answer.rate2};
   return out;
 }
+
+//' function to test get_ext_rate
+//' @param lac caldo rate trait 1
+//' @param num_spec number of immigrants
+//' @param K K
+//' @param A A
+//' @param clado_rate2 clado rate trait 2
+//' @param num_spec_trait1 num_spec trait 1
+//' @param num_spec_trait2 num_spec trait 2
+//' @return two rates
+//' @export
+// [[Rcpp::export]]
+Rcpp::NumericVector test_get_clado_rate(double lac,
+                                        double num_spec,
+                                        double K,
+                                        double A,
+                                        double clado_rate2,
+                                        size_t num_spec_trait1,
+                                        size_t num_spec_trait2) {
+
+  auto answer = get_clado_rate(lac, num_spec, K, A, clado_rate2,
+                             num_spec_trait1, num_spec_trait2);
+  Rcpp::NumericVector out = {answer.rate1, answer.rate2};
+  return out;
+}
+
+
 
 
 #endif /* DAISIE_RATES_H */

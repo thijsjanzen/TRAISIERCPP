@@ -28,8 +28,8 @@ reference_value <- TRAISIERCPP::DAISIE_get_ana_rate(laa,
 rcpp_value <- TRAISIERCPP::test_get_ana_rate(laa,
                                              num_immigrants,
                                              ana_rate2,
-                                             num_spec_trait1,
-                                             num_spec_trait2)
+                                             num_immig_trait1,
+                                             num_immig_trait2)
 
 testthat::expect_equal(reference_value$ana_rate1,
                        rcpp_value[[1]])

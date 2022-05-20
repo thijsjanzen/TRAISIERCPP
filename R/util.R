@@ -49,41 +49,6 @@ create_area_pars <- function(max_area,
        island_gradient_angle = island_gradient_angle)
 }
 
-#' Translate user-friendly ontogeny codes to numerics
-#'
-#' @inheritParams default_params_doc
-#'
-#' @return Numeric, 0 for null-ontogeny, 1 for beta function
-#' @keywords internal
-translate_island_ontogeny <- function(island_ontogeny) {
-
-  if (island_ontogeny == "const" || island_ontogeny == 0) {
-    island_ontogeny <- 0
-  }
-  if (island_ontogeny == "beta" || island_ontogeny == 1) {
-    island_ontogeny <- 1
-  }
-  return(island_ontogeny)
-}
-
-#' Translate user-friendly sea-level codes to numerics
-#'
-#' @inheritParams default_params_doc
-#'
-#' @return Numeric, 0 for null-sea-level, 1 for sine function
-#' @keywords internal
-translate_sea_level <- function(sea_level) {
-
-  if (sea_level == "const" || sea_level == 0) {
-    sea_level <- 0
-  }
-
-  if (sea_level == "sine" || sea_level == 1) {
-    sea_level <- 1
-  }
-  return(sea_level)
-}
-
 #' Converts simulation output into island output
 #'
 #' @inheritParams default_params_doc
@@ -1090,9 +1055,6 @@ DAISIE_format_CS_sampled_stt <- function(island_replicates,
 #'
 #' @return R plot.
 #' @author Luis Valente
-#' @seealso \code{\link{DAISIE_sim_cr}},
-#' \code{\link{DAISIE_sim_time_dep}},
-#' \code{\link{DAISIE_sim_cr_shift}}, \code{\link{DAISIE_format_CS}}
 #' @references Valente, L.M., A.B. Phillimore and R.S. Etienne (2015).
 #' Equilibrium and non-equilibrium dynamics simultaneously operate in the
 #' Galapagos islands. Ecology Letters 18: 844-852.

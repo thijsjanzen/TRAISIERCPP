@@ -69,6 +69,23 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// test_get_clado_rate
+Rcpp::NumericVector test_get_clado_rate(double lac, double num_spec, double K, double A, double clado_rate2, size_t num_spec_trait1, size_t num_spec_trait2);
+RcppExport SEXP _TRAISIERCPP_test_get_clado_rate(SEXP lacSEXP, SEXP num_specSEXP, SEXP KSEXP, SEXP ASEXP, SEXP clado_rate2SEXP, SEXP num_spec_trait1SEXP, SEXP num_spec_trait2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type lac(lacSEXP);
+    Rcpp::traits::input_parameter< double >::type num_spec(num_specSEXP);
+    Rcpp::traits::input_parameter< double >::type K(KSEXP);
+    Rcpp::traits::input_parameter< double >::type A(ASEXP);
+    Rcpp::traits::input_parameter< double >::type clado_rate2(clado_rate2SEXP);
+    Rcpp::traits::input_parameter< size_t >::type num_spec_trait1(num_spec_trait1SEXP);
+    Rcpp::traits::input_parameter< size_t >::type num_spec_trait2(num_spec_trait2SEXP);
+    rcpp_result_gen = Rcpp::wrap(test_get_clado_rate(lac, num_spec, K, A, clado_rate2, num_spec_trait1, num_spec_trait2));
+    return rcpp_result_gen;
+END_RCPP
+}
 // execute_time_loop
 Rcpp::List execute_time_loop(double timeval, double total_time, double gam, double laa, double lac, double mu, Rcpp::List area_pars_from_R, double K, double mainland_n, Rcpp::List trait_pars_R);
 RcppExport SEXP _TRAISIERCPP_execute_time_loop(SEXP timevalSEXP, SEXP total_timeSEXP, SEXP gamSEXP, SEXP laaSEXP, SEXP lacSEXP, SEXP muSEXP, SEXP area_pars_from_RSEXP, SEXP KSEXP, SEXP mainland_nSEXP, SEXP trait_pars_RSEXP) {
@@ -95,6 +112,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_TRAISIERCPP_test_get_immig_rate", (DL_FUNC) &_TRAISIERCPP_test_get_immig_rate, 7},
     {"_TRAISIERCPP_test_get_ext_rate", (DL_FUNC) &_TRAISIERCPP_test_get_ext_rate, 6},
     {"_TRAISIERCPP_test_get_ana_rate", (DL_FUNC) &_TRAISIERCPP_test_get_ana_rate, 5},
+    {"_TRAISIERCPP_test_get_clado_rate", (DL_FUNC) &_TRAISIERCPP_test_get_clado_rate, 7},
     {"_TRAISIERCPP_execute_time_loop", (DL_FUNC) &_TRAISIERCPP_execute_time_loop, 10},
     {NULL, NULL, 0}
 };
