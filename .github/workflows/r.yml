@@ -25,9 +25,8 @@ jobs:
       matrix:
         config:
           - {os: windows-latest, r: 'release'}
-          - {os: macos-12}
+          - {os: ubuntu-latest}
           - {os: macOS-latest, r: 'release'}
-          - {os: ubuntu-22.04}
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
