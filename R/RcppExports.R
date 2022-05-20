@@ -36,6 +36,18 @@ test_get_ext_rate <- function(mu, num_spec, A, ext_rate2, num_spec_trait1, num_s
     .Call('_TRAISIERCPP_test_get_ext_rate', PACKAGE = 'TRAISIERCPP', mu, num_spec, A, ext_rate2, num_spec_trait1, num_spec_trait2)
 }
 
+#' function to test get_ext_rate
+#' @param laa anagenesis rate trait 1
+#' @param num_immigrants number of immigrants
+#' @param ana_rate2 ana_rate trait 2
+#' @param num_spec_trait1 num_spec trait 1
+#' @param num_spec_trait2 num_spec trait 2
+#' @return two rates
+#' @export
+test_get_ana_rate <- function(laa, num_immigrants, ana_rate2, num_spec_trait1, num_spec_trait2) {
+    .Call('_TRAISIERCPP_test_get_ana_rate', PACKAGE = 'TRAISIERCPP', laa, num_immigrants, ana_rate2, num_spec_trait1, num_spec_trait2)
+}
+
 #' CPP function to execute expensive loop
 #' @param timeval timeval
 #' @param total_time total time

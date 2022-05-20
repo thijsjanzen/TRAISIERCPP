@@ -61,14 +61,14 @@ struct rates {
         two_rates trans,
         double m2) :
     immig_rate(immig.rate1),
-    immig_rate2(immig.rate2),
     ext_rate(ext.rate1),
-    ext_rate2(ext.rate2),
     ana_rate(ana.rate1),
-    ana_rate2(ana.rate2),
     clado_rate(clado.rate1),
-    clado_rate2(clado.rate2),
     trans_rate(trans.rate1),
+    immig_rate2(immig.rate2),
+    ext_rate2(ext.rate2),
+    ana_rate2(ana.rate2),
+    clado_rate2(clado.rate2),
     trans_rate2(trans.rate2),
     M2(m2)
   {
@@ -157,23 +157,13 @@ two_rates get_ext_rate(double mu,
 
 two_rates get_ana_rate(double laa,
                        int num_immigrants,
-                       const rates& trait_pars,
-                       const island_spec& island_spec_) {
-
-  size_t num_I_1 = 0;
-  size_t num_I_2 = 0;
-
-  for (size_t i = 0; i < island_spec_.data_.size(); ++i) {
-    auto s1 = island_spec_.data_[i].type_species;
-    auto s2 = island_spec_.data_[i].trait;
-
-    if (s1 == species_type::I && s2 == 1) num_I_1++;
-    if (s1 == species_type::I && s2 == 2) num_I_2++;
-  }
+                       double ana_rate2,
+                       size_t num_immig_trait1,
+                       size_t num_immig_trait2) {
 
   two_rates ana_rate;
-  ana_rate.rate1 = laa * num_I_1;
-  ana_rate.rate2 = trait_pars.ana_rate2* num_I_2;
+  ana_rate.rate1 = laa * num_immig_trait1;
+  ana_rate.rate2 = ana_rate2 * num_immig_trait2;
   return ana_rate;
 }
 
@@ -224,10 +214,15 @@ rates update_rates(double timeval,
 
   size_t num_spec_trait1 = 0;
   size_t num_spec_trait2 = 0;
+
+  size_t num_immig_trait1 = 0;
+  size_t num_immig_trait2 = 0;
   if (!island_spec_.data_.empty()) {
    for (const auto& i : island_spec_.data_) {
      if (i.trait == 1) num_spec_trait1++;
      if (i.trait == 2) num_spec_trait2++;
+     if (i.type_species == species_type::I && i.trait == 1) num_immig_trait1++;
+     if (i.type_species == species_type::I && i.trait == 2) num_immig_trait2++;
    }
   }
 
@@ -240,7 +235,10 @@ rates update_rates(double timeval,
                                     num_spec_trait1,
                                     num_spec_trait2);
 
-  two_rates ana_rate = get_ana_rate(laa, num_immigrants, trait_pars, island_spec_);
+  two_rates ana_rate = get_ana_rate(laa, num_immigrants,
+                                    trait_pars.ana_rate2,
+                                    num_immig_trait1,
+                                    num_immig_trait2);
   two_rates clado_rate = get_clado_rate(lac, num_spec, K, A,
                                         trait_pars,
                                         num_spec_trait1,
@@ -305,6 +303,26 @@ Rcpp::NumericVector test_get_ext_rate(double mu,
   return out;
 }
 
+//' function to test get_ext_rate
+//' @param laa anagenesis rate trait 1
+//' @param num_immigrants number of immigrants
+//' @param ana_rate2 ana_rate trait 2
+//' @param num_spec_trait1 num_spec trait 1
+//' @param num_spec_trait2 num_spec trait 2
+//' @return two rates
+//' @export
+// [[Rcpp::export]]
+Rcpp::NumericVector test_get_ana_rate(double laa,
+                                      int num_immigrants,
+                                      double ana_rate2,
+                                      size_t num_spec_trait1,
+                                      size_t num_spec_trait2) {
+
+  auto answer = get_ana_rate(laa, num_immigrants, ana_rate2,
+                             num_spec_trait1, num_spec_trait2);
+  Rcpp::NumericVector out = {answer.rate1, answer.rate2};
+  return out;
+}
 
 
 #endif /* DAISIE_RATES_H */
