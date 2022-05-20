@@ -51,7 +51,6 @@ DAISIE_sim_core_trait_dep_cpp <- function(
                                laa,
                                lac,
                                mu,
-                               area_pars,
                                K,
                                mainland_n,
                                trait_pars)

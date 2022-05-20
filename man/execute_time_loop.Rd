@@ -11,7 +11,6 @@ execute_time_loop(
   laa,
   lac,
   mu,
-  area_pars_from_R,
   K,
   mainland_n,
   trait_pars_R
@@ -29,8 +28,6 @@ execute_time_loop(
 \item{lac}{cladogenetic rate}
 
 \item{mu}{extinction rate}
-
-\item{area_pars_from_R}{area pars}
 
 \item{K}{K}
 

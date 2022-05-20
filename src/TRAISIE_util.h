@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <Rcpp.h>
-#include "TRAISIE_island_spec.h"
+#include "TRAISIE_structs.h"
 
 Rcpp::NumericMatrix make_stt_table_for_R(const std::vector< std::array< double, 7 >>& stt_table) {
   int num_rows = stt_table.size();

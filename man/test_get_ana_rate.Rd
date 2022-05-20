@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{test_get_ana_rate}
 \alias{test_get_ana_rate}
-\title{function to test get_ext_rate}
+\title{function to test get_ana_rate}
 \usage{
 test_get_ana_rate(
   laa,
@@ -27,5 +27,5 @@ test_get_ana_rate(
 two rates
 }
 \description{
-function to test get_ext_rate
+function to test get_ana_rate
 }

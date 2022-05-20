@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{test_get_clado_rate}
 \alias{test_get_clado_rate}
-\title{function to test get_ext_rate}
+\title{function to test_get_clado_rate}
 \usage{
 test_get_clado_rate(
   lac,
@@ -15,9 +15,9 @@ test_get_clado_rate(
 )
 }
 \arguments{
-\item{lac}{caldo rate trait 1}
+\item{lac}{clado rate trait 1}
 
-\item{num_spec}{number of immigrants}
+\item{num_spec}{number of species}
 
 \item{K}{K}
 
@@ -33,5 +33,5 @@ test_get_clado_rate(
 two rates
 }
 \description{
-function to test get_ext_rate
+function to test_get_clado_rate
 }

@@ -21,6 +21,25 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// execute_time_loop
+Rcpp::List execute_time_loop(double timeval, double total_time, double gam, double laa, double lac, double mu, double K, double mainland_n, Rcpp::List trait_pars_R);
+RcppExport SEXP _TRAISIERCPP_execute_time_loop(SEXP timevalSEXP, SEXP total_timeSEXP, SEXP gamSEXP, SEXP laaSEXP, SEXP lacSEXP, SEXP muSEXP, SEXP KSEXP, SEXP mainland_nSEXP, SEXP trait_pars_RSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type timeval(timevalSEXP);
+    Rcpp::traits::input_parameter< double >::type total_time(total_timeSEXP);
+    Rcpp::traits::input_parameter< double >::type gam(gamSEXP);
+    Rcpp::traits::input_parameter< double >::type laa(laaSEXP);
+    Rcpp::traits::input_parameter< double >::type lac(lacSEXP);
+    Rcpp::traits::input_parameter< double >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< double >::type K(KSEXP);
+    Rcpp::traits::input_parameter< double >::type mainland_n(mainland_nSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type trait_pars_R(trait_pars_RSEXP);
+    rcpp_result_gen = Rcpp::wrap(execute_time_loop(timeval, total_time, gam, laa, lac, mu, K, mainland_n, trait_pars_R));
+    return rcpp_result_gen;
+END_RCPP
+}
 // test_get_immig_rate
 Rcpp::NumericVector test_get_immig_rate(double gam, double A, int num_spec, double K, double mainland_n, double mainland_n2, double immig_rate2);
 RcppExport SEXP _TRAISIERCPP_test_get_immig_rate(SEXP gamSEXP, SEXP ASEXP, SEXP num_specSEXP, SEXP KSEXP, SEXP mainland_nSEXP, SEXP mainland_n2SEXP, SEXP immig_rate2SEXP) {
@@ -86,34 +105,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// execute_time_loop
-Rcpp::List execute_time_loop(double timeval, double total_time, double gam, double laa, double lac, double mu, Rcpp::List area_pars_from_R, double K, double mainland_n, Rcpp::List trait_pars_R);
-RcppExport SEXP _TRAISIERCPP_execute_time_loop(SEXP timevalSEXP, SEXP total_timeSEXP, SEXP gamSEXP, SEXP laaSEXP, SEXP lacSEXP, SEXP muSEXP, SEXP area_pars_from_RSEXP, SEXP KSEXP, SEXP mainland_nSEXP, SEXP trait_pars_RSEXP) {
+// test_get_trans_rate
+Rcpp::NumericVector test_get_trans_rate(double trans_rate, double trans_rate2, size_t num_spec_trait1, size_t num_spec_trait2);
+RcppExport SEXP _TRAISIERCPP_test_get_trans_rate(SEXP trans_rateSEXP, SEXP trans_rate2SEXP, SEXP num_spec_trait1SEXP, SEXP num_spec_trait2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type timeval(timevalSEXP);
-    Rcpp::traits::input_parameter< double >::type total_time(total_timeSEXP);
-    Rcpp::traits::input_parameter< double >::type gam(gamSEXP);
-    Rcpp::traits::input_parameter< double >::type laa(laaSEXP);
-    Rcpp::traits::input_parameter< double >::type lac(lacSEXP);
-    Rcpp::traits::input_parameter< double >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type area_pars_from_R(area_pars_from_RSEXP);
-    Rcpp::traits::input_parameter< double >::type K(KSEXP);
-    Rcpp::traits::input_parameter< double >::type mainland_n(mainland_nSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type trait_pars_R(trait_pars_RSEXP);
-    rcpp_result_gen = Rcpp::wrap(execute_time_loop(timeval, total_time, gam, laa, lac, mu, area_pars_from_R, K, mainland_n, trait_pars_R));
+    Rcpp::traits::input_parameter< double >::type trans_rate(trans_rateSEXP);
+    Rcpp::traits::input_parameter< double >::type trans_rate2(trans_rate2SEXP);
+    Rcpp::traits::input_parameter< size_t >::type num_spec_trait1(num_spec_trait1SEXP);
+    Rcpp::traits::input_parameter< size_t >::type num_spec_trait2(num_spec_trait2SEXP);
+    rcpp_result_gen = Rcpp::wrap(test_get_trans_rate(trans_rate, trans_rate2, num_spec_trait1, num_spec_trait2));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_TRAISIERCPP_sample_event", (DL_FUNC) &_TRAISIERCPP_sample_event, 1},
+    {"_TRAISIERCPP_execute_time_loop", (DL_FUNC) &_TRAISIERCPP_execute_time_loop, 9},
     {"_TRAISIERCPP_test_get_immig_rate", (DL_FUNC) &_TRAISIERCPP_test_get_immig_rate, 7},
     {"_TRAISIERCPP_test_get_ext_rate", (DL_FUNC) &_TRAISIERCPP_test_get_ext_rate, 6},
     {"_TRAISIERCPP_test_get_ana_rate", (DL_FUNC) &_TRAISIERCPP_test_get_ana_rate, 5},
     {"_TRAISIERCPP_test_get_clado_rate", (DL_FUNC) &_TRAISIERCPP_test_get_clado_rate, 7},
-    {"_TRAISIERCPP_execute_time_loop", (DL_FUNC) &_TRAISIERCPP_execute_time_loop, 10},
+    {"_TRAISIERCPP_test_get_trans_rate", (DL_FUNC) &_TRAISIERCPP_test_get_trans_rate, 4},
     {NULL, NULL, 0}
 };
 

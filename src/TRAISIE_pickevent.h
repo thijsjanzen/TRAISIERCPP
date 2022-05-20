@@ -4,7 +4,6 @@
 #include <Rcpp.h>
 #include <vector>
 #include "TRAISIE_rates.h"
-#include "TRAISIE_island_spec.h"
 
 void remove_species(island_spec& is,
                     int index) {

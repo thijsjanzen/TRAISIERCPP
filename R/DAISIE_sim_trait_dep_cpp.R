@@ -100,7 +100,7 @@ DAISIE_sim_trait_dep_cpp <- function(
         number_present <- 0
       }
       while (number_present < cond) {
-        if (M == 0 || is.null(trait_pars)){
+        if (M == 0 || is.null(trait_pars)) {
           stop("One state exist on mainland, should use constant rate DAISIE.")
         }else{
           for (m_spec in 1:M) {

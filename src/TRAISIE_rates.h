@@ -1,97 +1,12 @@
-#ifndef DAISIE_RATES_H
-#define DAISIE_RATES_H
+#ifndef TRAISIE_RATES_H
+#define TRAISIE_RATES_H
 
-#include <Rcpp.h>
 #include <vector>
 #include <array>
 #include <string>
 
-#include "TRAISIE_island_spec.h"
+#include "TRAISIE_structs.h"
 
-struct area_pars { // not really used though
-  double total_island_age;
-  double current_area;
-  double max_area;
-  double proportional_peak_t;
-  double sea_level_amplitude;
-  double sea_level_frequency;
-  double island_gradient_angle;
-
-  area_pars(const Rcpp::List& from_R) {
-    total_island_age = from_R["total_island_age"];
-    current_area = from_R["current_area"];
-    max_area = from_R["max_area"];
-    proportional_peak_t = from_R["proportional_peak_t"];
-    sea_level_amplitude = from_R["sea_level_amplitude"];
-    sea_level_frequency = from_R["sea_level_frequency"];
-    island_gradient_angle = from_R["island_gradient_angle"];
-  }
-};
-
-struct two_rates {
-  double rate1;
-  double rate2;
-};
-
-struct rates {
-  double immig_rate;
-  double ext_rate;
-  double ana_rate;
-  double clado_rate;
-  double trans_rate;
-  double immig_rate2;
-  double ext_rate2;
-  double ana_rate2;
-  double clado_rate2;
-  double trans_rate2;
-  double M2;
-
-  double sum() const {
-    return immig_rate + immig_rate2 +
-           ext_rate + ext_rate2 +
-           ana_rate + ana_rate2 +
-           clado_rate + clado_rate2 +
-           trans_rate + trans_rate2;
-  }
-
-  rates(two_rates immig,
-        two_rates ext,
-        two_rates ana,
-        two_rates clado,
-        two_rates trans,
-        double m2) :
-    immig_rate(immig.rate1),
-    ext_rate(ext.rate1),
-    ana_rate(ana.rate1),
-    clado_rate(clado.rate1),
-    trans_rate(trans.rate1),
-    immig_rate2(immig.rate2),
-    ext_rate2(ext.rate2),
-    ana_rate2(ana.rate2),
-    clado_rate2(clado.rate2),
-    trans_rate2(trans.rate2),
-    M2(m2)
-  {
-  }
-
-  rates(double gam,
-        double laa,
-        double lac,
-        double mu,
-        const Rcpp::List& trait_pars_from_R) {
-    immig_rate = gam;
-    immig_rate2 = trait_pars_from_R["immig_rate2"];
-    ext_rate =  mu;
-    ext_rate2 = trait_pars_from_R["ext_rate2"];
-    ana_rate = laa;
-    ana_rate2 = trait_pars_from_R["ana_rate2"];
-    clado_rate = lac;
-    clado_rate2 = trait_pars_from_R["clado_rate2"];
-    trans_rate =  trait_pars_from_R["trans_rate"];
-    trans_rate2 = trait_pars_from_R["trans_rate2"];
-    M2 = trait_pars_from_R["M2"];
-  }
-};
 
 //' function to draw event.
 //' @param event_prob event probability vector
@@ -127,9 +42,6 @@ two_rates get_immig_rate(double gam,
                          double mainland_n2,
                          double gam2) {
 
- // auto mainland_n2 = trait_pars.M2;
-//  auto gam2 = trait_pars.immig_rate2;
-
   two_rates immig_rate;
   immig_rate.rate1 = std::max(mainland_n * gam * (1.0 - (num_spec / (A * K))),
                               0.0);
@@ -138,9 +50,6 @@ two_rates get_immig_rate(double gam,
 
   return immig_rate;
 }
-
-
-
 
 
 two_rates get_ext_rate(double mu,
@@ -184,13 +93,14 @@ two_rates get_clado_rate(double lac,
   return clado_rate;
 }
 
-two_rates get_trans_rate(const rates& trait_pars,
+two_rates get_trans_rate(double trans_rate1,
+                         double trans_rate2,
                          size_t num_spec_trait1,
                          size_t num_spec_trait2) {
   two_rates trans_rate;
 
-  trans_rate.rate1 = trait_pars.trans_rate * num_spec_trait1;
-  trans_rate.rate2 = trait_pars.trans_rate2 * num_spec_trait2;
+  trans_rate.rate1 = trans_rate1 * num_spec_trait1;
+  trans_rate.rate2 = trans_rate2 * num_spec_trait2;
 
   return trans_rate;
 }
@@ -202,7 +112,6 @@ rates update_rates(double timeval,
                    double laa,
                    double lac,
                    double mu,
-                   const area_pars& ap,
                    double K,
                    double num_spec,
                    double num_immigrants,
@@ -243,7 +152,8 @@ rates update_rates(double timeval,
                                         trait_pars.clado_rate2,
                                         num_spec_trait1,
                                         num_spec_trait2);
-  two_rates trans_rate = get_trans_rate(trait_pars,
+  two_rates trans_rate = get_trans_rate(trait_pars.trans_rate,
+                                        trait_pars.trans_rate2,
                                         num_spec_trait1,
                                         num_spec_trait2);
 
@@ -252,104 +162,6 @@ rates update_rates(double timeval,
 
   return(r);
 }
-
-
-
-
-//' function to test get_immigration_rate
-//' @param gam gam
-//' @param A A
-//' @param num_spec num species
-//' @param K K value
-//' @param mainland_n num mainland species trait 1
-//' @param mainland_n2 num mainland species trait 2
-//' @param immig_rate2 gam2
-//' @return two rates
-//' @export
-// [[Rcpp::export]]
-Rcpp::NumericVector test_get_immig_rate(double gam,
-                                        double A,
-                                        int num_spec,
-                                        double K,
-                                        double mainland_n,
-                                        double mainland_n2,
-                                        double immig_rate2) {
-  auto answer = get_immig_rate(gam, A, num_spec, K, mainland_n,
-                               mainland_n2, immig_rate2);
-  Rcpp::NumericVector out = {answer.rate1, answer.rate2};
-  return out;
-}
-
-//' function to test get_ext_rate
-//' @param mu mu
-//' @param num_spec num species
-//' @param A A
-//' @param ext_rate2 ext_rate2
-//' @param num_spec_trait1 num_spec trait 1
-//' @param num_spec_trait2 num_spec trait 2
-//' @return two rates
-//' @export
-// [[Rcpp::export]]
-Rcpp::NumericVector test_get_ext_rate(double mu,
-                                      int num_spec,
-                                      double A,
-                                      double ext_rate2,
-                                      int num_spec_trait1,
-                                      int num_spec_trait2) {
-  auto answer = get_ext_rate(mu, num_spec,
-                             A, ext_rate2,
-                             num_spec_trait1, num_spec_trait2);
-  Rcpp::NumericVector out = {answer.rate1, answer.rate2};
-  return out;
-}
-
-//' function to test get_ext_rate
-//' @param laa anagenesis rate trait 1
-//' @param num_immigrants number of immigrants
-//' @param ana_rate2 ana_rate trait 2
-//' @param num_spec_trait1 num_spec trait 1
-//' @param num_spec_trait2 num_spec trait 2
-//' @return two rates
-//' @export
-// [[Rcpp::export]]
-Rcpp::NumericVector test_get_ana_rate(double laa,
-                                      int num_immigrants,
-                                      double ana_rate2,
-                                      size_t num_spec_trait1,
-                                      size_t num_spec_trait2) {
-
-  auto answer = get_ana_rate(laa, num_immigrants, ana_rate2,
-                             num_spec_trait1, num_spec_trait2);
-  Rcpp::NumericVector out = {answer.rate1, answer.rate2};
-  return out;
-}
-
-//' function to test get_ext_rate
-//' @param lac caldo rate trait 1
-//' @param num_spec number of immigrants
-//' @param K K
-//' @param A A
-//' @param clado_rate2 clado rate trait 2
-//' @param num_spec_trait1 num_spec trait 1
-//' @param num_spec_trait2 num_spec trait 2
-//' @return two rates
-//' @export
-// [[Rcpp::export]]
-Rcpp::NumericVector test_get_clado_rate(double lac,
-                                        double num_spec,
-                                        double K,
-                                        double A,
-                                        double clado_rate2,
-                                        size_t num_spec_trait1,
-                                        size_t num_spec_trait2) {
-
-  auto answer = get_clado_rate(lac, num_spec, K, A, clado_rate2,
-                             num_spec_trait1, num_spec_trait2);
-  Rcpp::NumericVector out = {answer.rate1, answer.rate2};
-  return out;
-}
-
-
 
 
 #endif /* DAISIE_RATES_H */

@@ -9,6 +9,22 @@ sample_event <- function(event_prob) {
     .Call('_TRAISIERCPP_sample_event', PACKAGE = 'TRAISIERCPP', event_prob)
 }
 
+#' CPP function to execute expensive loop
+#' @param timeval timeval
+#' @param total_time total time
+#' @param gam immigration rate
+#' @param laa anagenetic rate
+#' @param lac cladogenetic rate
+#' @param mu extinction rate
+#' @param K K
+#' @param mainland_n number of species on mainland
+#' @param trait_pars_R trait pars
+#' @return list with stt_table and island_spec
+#' @export
+execute_time_loop <- function(timeval, total_time, gam, laa, lac, mu, K, mainland_n, trait_pars_R) {
+    .Call('_TRAISIERCPP_execute_time_loop', PACKAGE = 'TRAISIERCPP', timeval, total_time, gam, laa, lac, mu, K, mainland_n, trait_pars_R)
+}
+
 #' function to test get_immigration_rate
 #' @param gam gam
 #' @param A A
@@ -36,7 +52,7 @@ test_get_ext_rate <- function(mu, num_spec, A, ext_rate2, num_spec_trait1, num_s
     .Call('_TRAISIERCPP_test_get_ext_rate', PACKAGE = 'TRAISIERCPP', mu, num_spec, A, ext_rate2, num_spec_trait1, num_spec_trait2)
 }
 
-#' function to test get_ext_rate
+#' function to test get_ana_rate
 #' @param laa anagenesis rate trait 1
 #' @param num_immigrants number of immigrants
 #' @param ana_rate2 ana_rate trait 2
@@ -48,9 +64,9 @@ test_get_ana_rate <- function(laa, num_immigrants, ana_rate2, num_spec_trait1, n
     .Call('_TRAISIERCPP_test_get_ana_rate', PACKAGE = 'TRAISIERCPP', laa, num_immigrants, ana_rate2, num_spec_trait1, num_spec_trait2)
 }
 
-#' function to test get_ext_rate
-#' @param lac caldo rate trait 1
-#' @param num_spec number of immigrants
+#' function to test_get_clado_rate
+#' @param lac clado rate trait 1
+#' @param num_spec number of species
 #' @param K K
 #' @param A A
 #' @param clado_rate2 clado rate trait 2
@@ -62,20 +78,14 @@ test_get_clado_rate <- function(lac, num_spec, K, A, clado_rate2, num_spec_trait
     .Call('_TRAISIERCPP_test_get_clado_rate', PACKAGE = 'TRAISIERCPP', lac, num_spec, K, A, clado_rate2, num_spec_trait1, num_spec_trait2)
 }
 
-#' CPP function to execute expensive loop
-#' @param timeval timeval
-#' @param total_time total time
-#' @param gam immigration rate
-#' @param laa anagenetic rate
-#' @param lac cladogenetic rate
-#' @param mu extinction rate
-#' @param area_pars_from_R area pars
-#' @param K K
-#' @param mainland_n number of species on mainland
-#' @param trait_pars_R trait pars
-#' @return list with stt_table and island_spec
+#' function to test get_trans_rate
+#' @param trans_rate
+#' @param trans_rate2
+#' @param num_spec_trait1 num_spec trait 1
+#' @param num_spec_trait2 num_spec trait 2
+#' @return two rates
 #' @export
-execute_time_loop <- function(timeval, total_time, gam, laa, lac, mu, area_pars_from_R, K, mainland_n, trait_pars_R) {
-    .Call('_TRAISIERCPP_execute_time_loop', PACKAGE = 'TRAISIERCPP', timeval, total_time, gam, laa, lac, mu, area_pars_from_R, K, mainland_n, trait_pars_R)
+test_get_trans_rate <- function(trans_rate, trans_rate2, num_spec_trait1, num_spec_trait2) {
+    .Call('_TRAISIERCPP_test_get_trans_rate', PACKAGE = 'TRAISIERCPP', trans_rate, trans_rate2, num_spec_trait1, num_spec_trait2)
 }
 

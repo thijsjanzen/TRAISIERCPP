@@ -5,10 +5,12 @@
 #include <thread>
 #include <chrono>
 
+#include "TRAISIE_structs.h"
 #include "TRAISIE_rates.h"
 #include "TRAISIE_pickevent.h"
-#include "TRAISIE_island_spec.h"
 #include "TRAISIE_util.h"
+
+#include "test_TRAISIE_RATES.h"
 
 double calc_next_time_eval(const rates& r,
                            double timeval) {
@@ -42,7 +44,6 @@ int update_num_immigrants(const island_spec& is) {
 //' @param laa anagenetic rate
 //' @param lac cladogenetic rate
 //' @param mu extinction rate
-//' @param area_pars_from_R area pars
 //' @param K K
 //' @param mainland_n number of species on mainland
 //' @param trait_pars_R trait pars
@@ -55,12 +56,10 @@ Rcpp::List execute_time_loop(double timeval,
                       double laa,
                       double lac,
                       double mu,
-                      Rcpp::List area_pars_from_R,
                       double K,
                       double mainland_n,
                       Rcpp::List trait_pars_R) {
 
-  area_pars ap(area_pars_from_R);
  // output("area_pars loaded");
   rates trait_pars(gam, laa, lac, mu, trait_pars_R);
  // output("trait_pars loaded");
@@ -94,7 +93,6 @@ Rcpp::List execute_time_loop(double timeval,
       laa,
       lac,
       mu,
-      ap,
       K,
       num_spec,
       num_immigrants,
