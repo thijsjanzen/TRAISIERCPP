@@ -108,6 +108,14 @@ test_update_rates <- function(timeval, total_time, gam, laa, lac, mu, K, num_spe
     .Call('_TRAISIERCPP_test_update_rates', PACKAGE = 'TRAISIERCPP', timeval, total_time, gam, laa, lac, mu, K, num_spec, num_immigrants, mainland_n, island_spec_R, trait_pars_R)
 }
 
+#' test draw prop
+#' @param Rcpp::NumericVector probs
+#' @return drawn index
+#' @export
+test_draw_prop <- function(v) {
+    .Call('_TRAISIERCPP_test_draw_prop', PACKAGE = 'TRAISIERCPP', v)
+}
+
 #' test immigration
 #' @param timeval timeval
 #' @param mainland_spec vector

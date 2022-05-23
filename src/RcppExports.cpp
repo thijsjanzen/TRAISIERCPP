@@ -141,6 +141,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// test_draw_prop
+int test_draw_prop(const Rcpp::NumericVector& v);
+RcppExport SEXP _TRAISIERCPP_test_draw_prop(SEXP vSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type v(vSEXP);
+    rcpp_result_gen = Rcpp::wrap(test_draw_prop(v));
+    return rcpp_result_gen;
+END_RCPP
+}
 // test_immigration
 Rcpp::StringMatrix test_immigration(double timeval, Rcpp::NumericVector mainland_spec_R, const Rcpp::StringVector& island_spec_R);
 RcppExport SEXP _TRAISIERCPP_test_immigration(SEXP timevalSEXP, SEXP mainland_spec_RSEXP, SEXP island_spec_RSEXP) {
@@ -164,6 +175,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_TRAISIERCPP_test_get_clado_rate", (DL_FUNC) &_TRAISIERCPP_test_get_clado_rate, 7},
     {"_TRAISIERCPP_test_get_trans_rate", (DL_FUNC) &_TRAISIERCPP_test_get_trans_rate, 4},
     {"_TRAISIERCPP_test_update_rates", (DL_FUNC) &_TRAISIERCPP_test_update_rates, 12},
+    {"_TRAISIERCPP_test_draw_prop", (DL_FUNC) &_TRAISIERCPP_test_draw_prop, 1},
     {"_TRAISIERCPP_test_immigration", (DL_FUNC) &_TRAISIERCPP_test_immigration, 3},
     {NULL, NULL, 0}
 };

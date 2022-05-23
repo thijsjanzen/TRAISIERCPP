@@ -5,6 +5,18 @@
 #include "TRAISIE_pickevent.h"
 #include "TRAISIE_util.h"
 
+//' test draw prop
+//' @param Rcpp::NumericVector probs
+//' @return drawn index
+//' @export
+// [[Rcpp::export]]
+int test_draw_prop(const Rcpp::NumericVector& v) {
+  std::vector<double> v2(v.begin(), v.end());
+  auto x = draw_prop(v2);
+  return x;
+}
+
+
 //' test immigration
 //' @param timeval timeval
 //' @param mainland_spec vector
