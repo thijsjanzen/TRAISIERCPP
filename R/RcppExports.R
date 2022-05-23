@@ -108,3 +108,13 @@ test_update_rates <- function(timeval, total_time, gam, laa, lac, mu, K, num_spe
     .Call('_TRAISIERCPP_test_update_rates', PACKAGE = 'TRAISIERCPP', timeval, total_time, gam, laa, lac, mu, K, num_spec, num_immigrants, mainland_n, island_spec_R, trait_pars_R)
 }
 
+#' test immigration
+#' @param timeval timeval
+#' @param mainland_spec vector
+#' @param island_spec_R matrix
+#' @return stringmatrix island_spec
+#' @export
+test_immigration <- function(timeval, mainland_spec_R, island_spec_R) {
+    .Call('_TRAISIERCPP_test_immigration', PACKAGE = 'TRAISIERCPP', timeval, mainland_spec_R, island_spec_R)
+}
+

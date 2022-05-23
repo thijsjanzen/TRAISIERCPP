@@ -11,6 +11,7 @@
 #include "TRAISIE_util.h"
 
 #include "test_TRAISIE_RATES.h"
+#include "test_TRAISIE_pickevent.h"
 
 double calc_next_time_eval(const rates& r,
                            double timeval) {
