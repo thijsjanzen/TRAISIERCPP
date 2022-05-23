@@ -24,13 +24,13 @@ create_hyper_pars <- function(d, x) {
 #' @author Richel J.C Bilderbeek, Joshua Lambert, Pedro Neves
 #'
 #'
-create_area_pars <- function(max_area,
-                             current_area,
-                             proportional_peak_t,
-                             total_island_age,
-                             sea_level_amplitude,
-                             sea_level_frequency,
-                             island_gradient_angle) {
+create_area_pars <- function(max_area = 1,
+                             current_area = 1,
+                             proportional_peak_t = 0.5,
+                             total_island_age = 5,
+                             sea_level_amplitude = 1,
+                             sea_level_frequency = 1,
+                             island_gradient_angle = 0.45) {
   testit::assert(max_area > 0.0)
   testit::assert(current_area > 0.0)
   testit::assert(proportional_peak_t >= 0.0)
@@ -1620,5 +1620,1278 @@ is_simulation_outputs <- function(simulation_outputs) {
   }
 }
 
+#' Internal function of the DAISIE simulation
+#'
+#' @inheritParams default_params_doc
+#' @keywords internal
+DAISIE_sim_core_trait_dep <- function(
+    time,
+    mainland_n,
+    pars,
+    island_ontogeny = 0,
+    sea_level = 0,
+    hyper_pars,
+    area_pars,
+    extcutoff = 1000,
+    trait_pars = NULL
+) {
+
+  #### Initialization ####
+  timeval <- 0
+  total_time <- time
+  island_ontogeny <- translate_island_ontogeny(island_ontogeny)
+  sea_level <- translate_sea_level(sea_level)
+
+  if (is.null(trait_pars)){
+    stop("A second set of rates should be contain considering two trait states.
+         If only one state,run DAISIE_sim_cr instead.")
+  }
+
+  if (pars[4] == 0 && trait_pars$immig_rate2 == 0) {
+    stop("Island has no species and the rate of
+    colonisation is zero. Island cannot be colonised.")
+  }
+
+  mainland_n2 <- trait_pars$M2
+  mainland_ntotal <- mainland_n + mainland_n2
+  if (mainland_n != 0){
+    mainland_spec <- seq(1, mainland_n, 1)
+  }else{
+    mainland_spec <- c()
+  }
+  maxspecID <- mainland_ntotal
+
+  island_spec <- c()
+  stt_table <- matrix(ncol = 7)
+  colnames(stt_table) <- c("Time","nI","nA","nC","nI2","nA2","nC2")
+  stt_table[1,] <- c(total_time,0,0,0,0,0,0)
+  lac <- pars[1]
+  mu <- pars[2]
+  K <- pars[3]
+  gam <- pars[4]
+  laa <- pars[5]
+
+  num_spec <- length(island_spec[, 1])
+  num_immigrants <- length(which(island_spec[, 4] == "I"))
+
+  #### Start Monte Carlo iterations ####
+  while (timeval < total_time) {
+    rates <- update_rates(
+      timeval = timeval,
+      total_time = total_time,
+      gam = gam,
+      laa = laa,
+      lac = lac,
+      mu = mu,
+      hyper_pars = hyper_pars,
+      area_pars = area_pars,
+      K = K,
+      num_spec = num_spec,
+      num_immigrants = num_immigrants,
+      mainland_n = mainland_n,
+      extcutoff = extcutoff,
+      island_ontogeny = 0,
+      sea_level = 0,
+      island_spec = island_spec,
+      trait_pars = trait_pars
+    )
+    timeval_and_dt <- calc_next_timeval(
+      max_rates = rates,
+      timeval = timeval
+    )
+    timeval <- timeval_and_dt$timeval
+
+    if (timeval < total_time) {
+      possible_event <- DAISIE_sample_event_trait_dep(
+        rates = rates
+      )
+
+      updated_state <- DAISIE_sim_update_state_trait_dep(
+        timeval = timeval,
+        total_time = total_time,
+        possible_event = possible_event,
+        maxspecID = maxspecID,
+        mainland_spec = mainland_spec,
+        island_spec = island_spec,
+        stt_table = stt_table,
+        trait_pars = trait_pars
+      )
+
+      island_spec <- updated_state$island_spec
+      maxspecID <- updated_state$maxspecID
+      stt_table <- updated_state$stt_table
+      num_spec <- length(island_spec[, 1])
+      num_immigrants <- length(which(island_spec[, 4] == "I"))
+    }
+  }
+  #### Finalize STT ####
+  stt_table <- rbind(
+    stt_table,
+    c(
+      0,
+      stt_table[nrow(stt_table), 2],
+      stt_table[nrow(stt_table), 3],
+      stt_table[nrow(stt_table), 4],
+      stt_table[nrow(stt_table), 5],
+      stt_table[nrow(stt_table), 6],
+      stt_table[nrow(stt_table), 7]
+    )
+  )
+
+  return(island_spec)
+}
 
 
+
+#' create island spec helper function
+#' @param time time
+#' @param mainland_n mainland n
+#' @param immig_rate igr
+#' @param ext_rate er
+#' @param ana_rate ar
+#' @param clado_rate cr
+#' @param immig_rate2 igr2
+#' @param ext_rate2 er2
+#' @param ana_rate2 ar2
+#' @param clado_rate2 cr2
+#' @param trans_rate tr
+#' @param trans_rate2 tr2
+#' @param M2 m2
+#' @export
+#' @return stochastic island spec table
+create_island_spec <- function(time,
+                               mainland_n,
+                               K,
+                               immig_rate,
+                               ext_rate,
+                               ana_rate,
+                               clado_rate,
+                               immig_rate2,
+                               ext_rate2,
+                               ana_rate2,
+                               clado_rate2,
+                               trans_rate,
+                               trans_rate2,
+                               M2) {
+
+  local_trait_pars <- TRAISIERCPP::create_trait_pars(trans_rate = trans_rate,
+                                                     immig_rate2 = immig_rate2, ext_rate2 = ext_rate2,
+                                                     ana_rate2 = ana_rate2,
+                                                     clado_rate2 = clado_rate2,
+                                                     trans_rate2 = trans_rate2,
+                                                     M2 = M2)
+
+
+  answer <- DAISIE_sim_core_trait_dep(time = time,
+                                            mainland_n = mainland_n,
+                                            pars = c(clado_rate,
+                                                     ext_rate,
+                                                     K,
+                                                     immig_rate,
+                                                     ana_rate),
+                                            island_ontogeny = 0,
+                                            sea_level = 0,
+                                            hyper_pars = TRAISIERCPP::create_hyper_pars(d = 0, x = 0),
+                                            area_pars = TRAISIERCPP::create_area_pars(),
+                                            extcutoff = 1000,
+                                            trait_pars = local_trait_pars)
+
+ return(answer)
+}
+
+
+#' Updates state of island given sampled event with two trait states.
+#'
+#' Makes the event happen by updating island species matrix and species IDs.
+#' What event happens is determined by the sampling in the algorithm.
+#'
+#' @inheritParams default_params_doc
+#'
+#' @return The updated state of the system, which is a list with the
+#' \code{island_spec} matrix, an integer \code{maxspecID} with the most recent
+#' ID of species and the \code{stt_table}, a matrix with the current species
+#' through time table.
+#'
+#' @keywords internal
+#'
+#' @seealso \link{DAISIE_sim_core_trait_dep}
+DAISIE_sim_update_state_trait_dep <- function(timeval,
+                                              total_time,
+                                              possible_event,
+                                              maxspecID,
+                                              mainland_spec,
+                                              island_spec,
+                                              stt_table,
+                                              trait_pars)
+{
+  if (possible_event > 10) {
+    # Nothing happens
+  }
+
+  ##########################################
+  #IMMIGRATION
+  if (possible_event == 1)
+  {
+    colonist = DDD::sample2(mainland_spec,1)
+
+    if (length(island_spec[,1]) != 0)
+    {
+      isitthere = which(island_spec[,1] == colonist)
+    } else
+    {
+      isitthere = c()
+    }
+
+    if (length(isitthere) == 0)
+    {
+      island_spec = rbind(island_spec,c(colonist,colonist,timeval,"I",NA,NA,NA,1))
+    }
+
+    if (length(isitthere) != 0)
+    {
+      island_spec[isitthere,] = c(colonist,colonist,timeval,"I",NA,NA,NA,1)
+    }
+  }
+
+  ##########################################
+  #EXTINCTION
+  if (possible_event == 2)
+  {
+    island_spec_state1 = which(island_spec[,8] == "1")
+    extinct = DDD::sample2(island_spec_state1, 1)
+
+    #this chooses the row of species data to remove
+
+    typeofspecies = island_spec[extinct,4]
+
+    if(typeofspecies == "I")
+    {
+      island_spec = island_spec[-extinct,]
+    }
+    #remove immigrant
+
+    if(typeofspecies == "A")
+    {
+      island_spec = island_spec[-extinct,]
+    }
+    #remove anagenetic
+
+    if(typeofspecies == "C")
+    {
+      #remove cladogenetic
+      #first find species with same ancestor AND arrival total_time
+      sisters = intersect(which(island_spec[,2] == island_spec[extinct,2]),which(island_spec[,3] == island_spec[extinct,3]))
+      survivors = sisters[which(sisters != extinct)]
+
+      if(length(sisters) == 2)
+      {
+        #survivors status becomes anagenetic
+        island_spec[survivors,4] = "A"
+        island_spec[survivors,c(5,6)] = c(NA,NA)
+        island_spec[survivors,7] = "Clado_extinct"
+        island_spec = island_spec[-extinct,]
+      }
+
+      if(length(sisters) >= 3)
+      {
+        numberofsplits = nchar(island_spec[extinct, 5])
+
+        mostrecentspl = substring(island_spec[extinct,5],numberofsplits)
+
+        if(mostrecentspl=="B")
+        {
+          sistermostrecentspl = "A"
+        }
+        if(mostrecentspl=="A")
+        {
+          sistermostrecentspl = "B"
+        }
+
+        motiftofind = paste(substring(island_spec[extinct,5],1,numberofsplits-1),sistermostrecentspl,sep = "")
+
+        possiblesister = survivors[which(substring(island_spec[survivors,5],1,numberofsplits) == motiftofind)]
+
+        #different rules depending on whether a B or A is removed. B going extinct is simpler because it only
+        #carries a record of the most recent speciation
+        if(mostrecentspl == "A")
+        {
+          #change the splitting date of the sister species so that it inherits the early splitting that used to belong to A.
+          tochange = possiblesister[which(island_spec[possiblesister,6] == min(as.numeric(island_spec[possiblesister,6])))]
+          island_spec[tochange,6] = island_spec[extinct,6]
+        }
+
+        #remove the offending A/B from these species
+        island_spec[possiblesister,5] = paste(
+          substring(island_spec[possiblesister,5],1,numberofsplits - 1),
+          substring(island_spec[possiblesister,5],numberofsplits + 1, nchar(island_spec[possiblesister,5])),sep = "")
+        island_spec = island_spec[-extinct,]
+      }
+    }
+    island_spec = rbind(island_spec)
+  }
+
+  ##########################################
+  #ANAGENESIS
+  if(possible_event == 3)
+  {
+    immi_specs = intersect(which(island_spec[,4] == "I"), which(island_spec[,8] == "1"))
+    #we only allow immigrants to undergo anagenesis
+    if(length(immi_specs) == 1)
+    {
+      anagenesis = immi_specs
+    }
+    if(length(immi_specs) > 1)
+    {
+      anagenesis = DDD::sample2(immi_specs,1)
+    }
+
+    maxspecID = maxspecID + 1
+    island_spec[anagenesis,4] = "A"
+    island_spec[anagenesis,1] = maxspecID
+    island_spec[anagenesis,7] = "Immig_parent"
+    if(!is.null(trait_pars)){
+      island_spec[anagenesis,8] = "1"
+    }
+  }
+
+  ##########################################
+  #CLADOGENESIS - this splits species into two new species - both of which receive
+  if(possible_event == 4)
+  {
+    island_spec_state1 = which(island_spec[,8] == "1")
+    tosplit = DDD::sample2(island_spec_state1,1)
+
+    #if the species that speciates is cladogenetic
+    if(island_spec[tosplit,4] == "C")
+    {
+      #for daughter A
+
+      island_spec[tosplit,4] = "C"
+      island_spec[tosplit,1] = maxspecID + 1
+      oldstatus = island_spec[tosplit,5]
+      island_spec[tosplit,5] = paste(oldstatus,"A",sep = "")
+      #island_spec[tosplit,6] = timeval
+      island_spec[tosplit,7] = NA
+      island_spec[tosplit,8] = "1"
+
+      #for daughter B
+      island_spec = rbind(island_spec,c(maxspecID + 2,island_spec[tosplit,2],island_spec[tosplit,3],
+                                        "C",paste(oldstatus,"B",sep = ""),timeval,NA,1))
+      maxspecID = maxspecID + 2
+    } else {
+      #if the species that speciates is not cladogenetic
+
+      #for daughter A
+
+      island_spec[tosplit,4] = "C"
+      island_spec[tosplit,1] = maxspecID + 1
+      island_spec[tosplit,5] = "A"
+      island_spec[tosplit,6] = island_spec[tosplit,3]
+      island_spec[tosplit,7] = NA
+      island_spec[tosplit,8] = "1"
+
+      #for daughter B
+      island_spec = rbind(island_spec,c(maxspecID + 2,island_spec[tosplit,2],island_spec[tosplit,3],"C","B",timeval,NA,1))
+      maxspecID = maxspecID + 2
+    }
+  }
+
+  ##########################
+  ##transition from state1 to state2
+  if(possible_event == 5){
+    ##select a species with trait state1
+    island_spec_state1 = which(island_spec[,8] == "1")
+    totrans = DDD::sample2(island_spec_state1,1)
+    island_spec[totrans,8] = "2"
+  }
+
+  ##########################
+  ##immigration with state2
+  if (possible_event == 6)
+  {
+    mainland1 = length(mainland_spec)
+    mainland2 = trait_pars$M2
+    mainland_total = mainland1 + mainland2
+    colonist = DDD::sample2((mainland1 + 1):mainland_total,1)
+
+    if (length(island_spec[,1]) != 0)
+    {
+      isitthere = which(island_spec[,1] == colonist)
+    } else
+    {
+      isitthere = c()
+    }
+
+    if (length(isitthere) == 0)
+    {
+      island_spec = rbind(island_spec,c(colonist,colonist,timeval,"I",NA,NA,NA,2))
+    }
+
+    if (length(isitthere) != 0)
+    {
+      island_spec[isitthere,] = c(colonist,colonist,timeval,"I",NA,NA,NA,2)
+    }
+  }
+
+  ##########################################
+  #EXTINCTION
+  if (possible_event == 7)
+  {
+    island_spec_state2 = which(island_spec[,8] == "2")
+    extinct = DDD::sample2(island_spec_state2,1)
+    #this chooses the row of species data with state2 to remove
+
+    typeofspecies = island_spec[extinct,4]
+
+    if(typeofspecies == "I")
+    {
+      island_spec = island_spec[-extinct,]
+    }
+    #remove immigrant
+
+    if(typeofspecies == "A")
+    {
+      island_spec = island_spec[-extinct,]
+    }
+    #remove anagenetic
+
+    if(typeofspecies == "C")
+    {
+      #remove cladogenetic
+      #first find species with same ancestor AND arrival total_time
+      sisters = intersect(which(island_spec[,2] == island_spec[extinct,2]), which(island_spec[,3] == island_spec[extinct,3]))
+      survivors = sisters[which(sisters != extinct)]
+
+      if(length(sisters) == 2)
+      {
+        #survivors status becomes anagenetic
+        island_spec[survivors,4] = "A"
+        island_spec[survivors,c(5,6)] = c(NA,NA)
+        island_spec[survivors,7] = "Clado_extinct"
+        island_spec = island_spec[-extinct,]
+      }
+
+      if(length(sisters) >= 3)
+      {
+        numberofsplits = nchar(island_spec[extinct,5])
+
+        mostrecentspl = substring(island_spec[extinct,5],numberofsplits)
+
+        if(mostrecentspl=="B")
+        {
+          sistermostrecentspl = "A"
+        }
+        if(mostrecentspl=="A")
+        {
+          sistermostrecentspl = "B"
+        }
+
+        motiftofind = paste(substring(island_spec[extinct,5],1,numberofsplits-1),sistermostrecentspl,sep = "")
+
+        possiblesister = survivors[which(substring(island_spec[survivors,5],1,numberofsplits) == motiftofind)]
+
+        #different rules depending on whether a B or A is removed. B going extinct is simpler because it only
+        #carries a record of the most recent speciation
+        if(mostrecentspl == "A")
+        {
+          #change the splitting date of the sister species so that it inherits the early splitting that used to belong to A.
+          tochange = possiblesister[which(island_spec[possiblesister,6] == min(as.numeric(island_spec[possiblesister,6])))]
+          island_spec[tochange,6] = island_spec[extinct,6]
+        }
+
+        #remove the offending A/B from these species
+        island_spec[possiblesister,5] = paste(substring(island_spec[possiblesister,5],1,numberofsplits - 1),
+                                              substring(island_spec[possiblesister,5],numberofsplits + 1,
+                                                        nchar(island_spec[possiblesister,5])),sep = "")
+        island_spec = island_spec[-extinct,]
+      }
+    }
+    island_spec = rbind(island_spec)
+  }
+
+  ##########################################
+  #ANAGENESIS
+  if(possible_event == 8)
+  {
+    immi_specs = intersect(which(island_spec[,4] == "I"), which(island_spec[,8] == "2"))
+
+    #we only allow immigrants to undergo anagenesis
+    if(length(immi_specs) == 1)
+    {
+      anagenesis = immi_specs
+    }
+    if(length(immi_specs) > 1)
+    {
+      anagenesis = DDD::sample2(immi_specs,1)
+    }
+
+    maxspecID = maxspecID + 1
+    island_spec[anagenesis,4] = "A"
+    island_spec[anagenesis,1] = maxspecID
+    island_spec[anagenesis,7] = "Immig_parent"
+    if(!is.null(trait_pars)){
+      island_spec[anagenesis,8] = "2"
+    }
+  }
+
+  ##########################################
+  #CLADOGENESIS - this splits species into two new species - both of which receive
+  if(possible_event == 9)
+  {
+
+    island_spec_state1 = which(island_spec[,8] == "2")
+    tosplit = DDD::sample2(island_spec_state1,1)
+    #if the species that speciates is cladogenetic
+    if(island_spec[tosplit,4] == "C")
+    {
+      #for daughter A
+
+      island_spec[tosplit,4] = "C"
+      island_spec[tosplit,1] = maxspecID + 1
+      oldstatus = island_spec[tosplit,5]
+      island_spec[tosplit,5] = paste(oldstatus,"A",sep = "")
+      #island_spec[tosplit,6] = timeval
+      island_spec[tosplit,7] = NA
+      if(!is.null(trait_pars)){
+        island_spec[tosplit,8] = "2"
+      }
+      #for daughter B
+      if(is.null(trait_pars)){
+        island_spec = rbind(island_spec,c(maxspecID + 2,island_spec[tosplit,2],island_spec[tosplit,3],
+                                          "C",paste(oldstatus,"B",sep = ""),timeval,NA))
+      }else{
+        island_spec = rbind(island_spec,c(maxspecID + 2,island_spec[tosplit,2],island_spec[tosplit,3],
+                                          "C",paste(oldstatus,"B",sep = ""),timeval,NA,2))
+      }
+
+
+      maxspecID = maxspecID + 2
+    } else {
+      #if the species that speciates is not cladogenetic
+
+      #for daughter A
+
+      island_spec[tosplit,4] = "C"
+      island_spec[tosplit,1] = maxspecID + 1
+      island_spec[tosplit,5] = "A"
+      island_spec[tosplit,6] = island_spec[tosplit,3]
+      island_spec[tosplit,7] = NA
+      if(!is.null(trait_pars)){
+        island_spec[tosplit,8] = "2"
+      }
+      #for daughter B
+      if(is.null(trait_pars)){
+        island_spec = rbind(island_spec,c(maxspecID + 2,island_spec[tosplit,2],island_spec[tosplit,3],"C","B",timeval,NA))
+      }else{
+        island_spec = rbind(island_spec,c(maxspecID + 2,island_spec[tosplit,2],island_spec[tosplit,3],"C","B",timeval,NA,2))
+      }
+      maxspecID = maxspecID + 2
+    }
+  }
+
+
+  ##########################
+  ##transition from state2 to state1
+  if(possible_event == 10){
+    ##select a species with trait state1
+    island_spec_state1 = which(island_spec[,8] == "2")
+    totrans = DDD::sample2(island_spec_state1,1)
+    island_spec[totrans,8] = "1"
+  }
+
+
+
+  if (possible_event <= 10 && total_time >= timeval) {
+    stt_table <- rbind(stt_table,
+                       c(total_time - timeval,
+                         length(intersect(which(island_spec[,4] == "I"),which(island_spec[,8] == "1"))),    #nI1
+                         length(intersect(which(island_spec[,4] == "A"),which(island_spec[,8] == "1"))),    #nA1
+                         length(intersect(which(island_spec[,4] == "C"),which(island_spec[,8] == "1"))),    #nC1
+                         length(intersect(which(island_spec[,4] == "I"),which(island_spec[,8] == "2"))),    #nI2
+                         length(intersect(which(island_spec[,4] == "A"),which(island_spec[,8] == "2"))),    #nA2
+                         length(intersect(which(island_spec[,4] == "C"),which(island_spec[,8] == "2")))))   #nC2
+  }
+
+  updated_state <- list(island_spec = island_spec,
+                        maxspecID = maxspecID,
+                        stt_table = stt_table)
+  return(updated_state)
+}
+
+#' Calculates algorithm rates
+#' @description Internal function that updates the all the rates and
+#' max extinction horizon at time t.
+#' @family rate calculations
+#'
+#' @inheritParams default_params_doc
+#'
+#' @seealso \code{\link{update_max_rates}()}
+#' @keywords internal
+#' @return a named list with the updated effective rates.
+update_rates <- function(timeval,
+                         total_time,
+                         gam,
+                         laa,
+                         lac,
+                         mu,
+                         hyper_pars = hyper_pars,
+                         area_pars = NULL,
+                         peak = NULL,
+                         island_ontogeny = NULL,
+                         sea_level = NULL,
+                         extcutoff,
+                         K,
+                         num_spec,
+                         num_immigrants,
+                         mainland_n,
+                         trait_pars = NULL,
+                         island_spec = NULL) {
+  # Function to calculate rates at time = timeval. Returns list with each rate
+  if (!is.null(trait_pars)) {
+    return(
+      update_rates_trait(
+        timeval = timeval,
+        total_time = total_time,
+        gam = gam,
+        mu = mu,
+        laa = laa,
+        lac = lac,
+        hyper_pars = hyper_pars,
+        area_pars = area_pars,
+        island_ontogeny = island_ontogeny,
+        sea_level = sea_level,
+        extcutoff = extcutoff,
+        K = K,
+        mainland_n = mainland_n,
+        num_spec = num_spec,
+        num_immigrants = num_immigrants,
+        trait_pars = trait_pars,
+        island_spec = island_spec
+      )
+    )
+  }
+
+  A <- island_area(
+    timeval = timeval,
+    total_time = total_time,
+    area_pars = area_pars,
+    peak = peak,
+    island_ontogeny = island_ontogeny,
+    sea_level = sea_level
+  )
+
+  immig_rate <- get_immig_rate(
+    gam = gam,
+    A = A,
+    num_spec = num_spec,
+    K = K,
+    mainland_n = mainland_n
+  )
+  # testit::assert(is.numeric(immig_rate))
+  ext_rate <- get_ext_rate(
+    mu = mu,
+    hyper_pars = hyper_pars,
+    extcutoff = extcutoff,
+    num_spec = num_spec,
+    A = A
+  )
+  # testit::assert(is.numeric(ext_rate))
+  ana_rate <- get_ana_rate(
+    laa = laa,
+    num_immigrants = num_immigrants
+  )
+  # testit::assert(is.numeric(ana_rate))
+  clado_rate <- get_clado_rate(
+    lac = lac,
+    hyper_pars = hyper_pars,
+    num_spec = num_spec,
+    K = K,
+    A = A
+  )
+  # testit::assert(is.numeric(clado_rate))
+
+  rates <- list(
+    immig_rate = immig_rate,
+    ext_rate = ext_rate,
+    ana_rate = ana_rate,
+    clado_rate = clado_rate
+  )
+  return(rates)
+}
+
+update_rates_trait <- function(timeval,
+                               total_time,
+                               gam,
+                               laa,
+                               lac,
+                               mu,
+                               hyper_pars = hyper_pars,
+                               area_pars = NULL,
+                               peak = NULL,
+                               island_ontogeny = NULL,
+                               sea_level = NULL,
+                               extcutoff,
+                               K,
+                               num_spec,
+                               num_immigrants,
+                               mainland_n,
+                               trait_pars = NULL,
+                               island_spec = NULL) {
+  # Function to calculate rates at time = timeval. Returns list with each rate.
+
+  A <- island_area(
+    timeval = timeval,
+    total_time = total_time,
+    area_pars = area_pars,
+    peak = peak,
+    island_ontogeny = island_ontogeny,
+    sea_level = sea_level
+  )
+
+  immig_rate <- get_immig_rate(
+    gam = gam,
+    A = A,
+    num_spec = num_spec,
+    K = K,
+    mainland_n = mainland_n,
+    trait_pars = trait_pars,
+    island_spec = island_spec
+  )
+
+  ext_rate <- get_ext_rate(
+    mu = mu,
+    hyper_pars = hyper_pars,
+    extcutoff = extcutoff,
+    num_spec = num_spec,
+    A = A,
+    trait_pars = trait_pars,
+    island_spec = island_spec
+  )
+
+  ana_rate <- get_ana_rate(
+    laa = laa,
+    num_immigrants = num_immigrants,
+    trait_pars = trait_pars,
+    island_spec = island_spec
+  )
+  clado_rate <- get_clado_rate(
+    lac = lac,
+    hyper_pars = hyper_pars,
+    num_spec = num_spec,
+    K = K,
+    A = A,
+    trait_pars = trait_pars,
+    island_spec = island_spec
+  )
+
+
+
+  trans_rate <- get_trans_rate(trait_pars = trait_pars,
+                               island_spec = island_spec)
+
+
+  rates <- list(
+    immig_rate = immig_rate$immig_rate1,
+    ext_rate = ext_rate$ext_rate1,
+    ana_rate = ana_rate$ana_rate1,
+    clado_rate = clado_rate$clado_rate1,
+    trans_rate = trans_rate$trans_rate1,
+    immig_rate2 = immig_rate$immig_rate2,
+    ext_rate2 = ext_rate$ext_rate2,
+    ana_rate2 = ana_rate$ana_rate2,
+    clado_rate2 = clado_rate$clado_rate2,
+    trans_rate2 = trans_rate$trans_rate2,
+    M2 = trait_pars$M2)
+
+  return(rates)
+}
+#' Function to describe changes in area through time.
+#'
+#' @inheritParams default_params_doc
+#'
+#' @keywords internal
+#' @family rate calculations
+#' @author Pedro Neves, Joshua Lambert
+#' @references
+#' Valente, Luis M., Rampal S. Etienne, and Albert B. Phillimore.
+#' "The effects of island ontogeny on species diversity and phylogeny."
+#' Proceedings of the Royal Society of London B: Biological
+#' Sciences 281.1784 (2014): 20133227.
+island_area <- function(timeval,
+                        total_time,
+                        area_pars,
+                        peak,
+                        island_ontogeny,
+                        sea_level) {
+  # testit::assert(are_area_pars(area_pars))
+  Tmax <- area_pars$total_island_age
+  Amax <- area_pars$max_area
+  Acurr <- area_pars$current_area
+  proptime_max <- area_pars$proportional_peak_t
+  ampl <- area_pars$sea_level_amplitude
+  freq <- area_pars$sea_level_frequency
+  theta <- area_pars$island_gradient_angle
+  proptime <- timeval / Tmax
+  proptime_curr <- total_time / Tmax
+  theta <- theta * (pi / 180)
+  # Constant ontogeny and sea-level
+  if (island_ontogeny == 0 & sea_level == 0) {
+    if (Amax != 1 || is.null(Amax)) {
+      warning("Constant island area requires a maximum area of 1.")
+    }
+    return(1)
+  }
+
+  # Beta function ontogeny and constant sea-level
+  if (island_ontogeny == 1 & sea_level == 0) {
+    At <- calc_Abeta(proptime = proptime,
+                     proptime_max = proptime_max,
+                     peak = peak,
+                     Amax = Amax)
+    return(At)
+  }
+
+  if (island_ontogeny == 0 & sea_level == 1) {
+    angular_freq <- 2 * pi * freq
+    delta_sl <- ampl * cos((proptime_curr - proptime) * angular_freq)
+    r_curr <- sqrt((Acurr) / pi)
+    h_curr <- tan(theta) * r_curr
+    h_delta <- max(0, h_curr - ampl + delta_sl)
+    At <- pi * (h_delta / tan(theta)) ^ 2
+    return(At)
+  }
+  if (island_ontogeny == 1 && sea_level == 1) {
+    A_beta <- calc_Abeta(proptime,
+                         proptime_max,
+                         peak,
+                         Amax)
+    angular_freq <- 2 * pi * freq
+    delta_sl <- ampl * cos((proptime_curr - proptime) * angular_freq)
+    r_curr <- sqrt(A_beta / pi)
+    h_curr <- tan(theta) * r_curr
+    h_delta <- max(0, h_curr - ampl + delta_sl)
+    At <- pi * (h_delta / tan(theta)) ^ 2
+    return(At)
+  }
+}
+
+#' Function to describe changes in extinction rate through time.
+#'
+#' @inheritParams default_params_doc
+#'
+#' @keywords internal
+#' @family rate calculations
+#' @references Valente, Luis M., Rampal S. Etienne, and Albert B. Phillimore.
+#' "The effects of island ontogeny on species diversity and phylogeny."
+#' Proceedings of the Royal Society of London B: Biological Sciences 281.1784
+#' (2014): 20133227.
+#' @author Pedro Neves, Joshua Lambert, Shu Xie
+get_ext_rate <- function(mu,
+                         hyper_pars,
+                         extcutoff = 1000,
+                         num_spec,
+                         A,
+                         trait_pars = NULL,
+                         island_spec = NULL) {
+
+  x <- hyper_pars$x
+  if (is.null(trait_pars)) {
+    ext_rate <- max(0, mu * (A ^ -x) * num_spec, na.rm = TRUE)
+    ext_rate <- min(ext_rate, extcutoff, na.rm = TRUE)
+    # testit::assert(ext_rate >= 0)
+    return(ext_rate)
+  } else {   ##species have two states
+    if (is.matrix(island_spec) || is.null(island_spec)) {
+      num_spec_trait1 <- length(which(island_spec[, 8] == "1"))
+      num_spec_trait2 <- length(which(island_spec[, 8] == "2"))
+    }
+    ext_rate1 <- mu * num_spec_trait1
+    ext_rate2 <- trait_pars$ext_rate2 * num_spec_trait2
+    ext_list <- list(ext_rate1 = ext_rate1,
+                     ext_rate2 = ext_rate2)
+    return(ext_list)
+  }
+}
+
+#' Calculate anagenesis rate
+#' @description Internal function.
+#' Calculates the anagenesis rate given the current number of
+#' immigrant species and the per capita rate.
+#'
+#' @inheritParams default_params_doc
+#'
+#' @keywords internal
+#' @family rate calculations
+#' @author Pedro Neves, Joshua Lambert, Shu Xie
+get_ana_rate <- function(laa,
+                         num_immigrants,
+                         island_spec = NULL,
+                         trait_pars = NULL) {
+
+  if(is.null(trait_pars)){
+    ana_rate <- laa * num_immigrants
+    return(ana_rate)
+  }else{
+    ana_rate1 = laa * length(intersect(which(island_spec[,4] == "I"),
+                                       which(island_spec[,8] == "1")))
+    ana_rate2 = trait_pars$ana_rate2 * length(intersect(which(island_spec[,4] == "I"),
+                                                        which(island_spec[,8] == "2")))
+    ana_list <- list(ana_rate1 = ana_rate1,
+                     ana_rate2 = ana_rate2)
+    return(ana_list)
+  }
+}
+
+#' Calculate cladogenesis rate
+#' @description Internal function.
+#' Calculates the cladogenesis rate given the current number of
+#' species in the system, the carrying capacity and the per capita cladogenesis
+#' rate
+#'
+#' @inheritParams default_params_doc
+#'
+#' @keywords internal
+#' @author Pedro Neves, Joshua Lambert, Shu Xie
+get_clado_rate <- function(lac,
+                           hyper_pars,
+                           num_spec,
+                           K,
+                           A,
+                           trait_pars = NULL,
+                           island_spec = NULL) {
+  # testit::assert(are_hyper_pars(hyper_pars))
+
+  d <- hyper_pars$d
+  if (is.null(trait_pars)) {
+    clado_rate <- max(
+      0, lac * num_spec * (A ^ d) * (1 - num_spec / (K * A)), na.rm = TRUE
+    )
+    # testit::assert(clado_rate >= 0)
+    # testit::assert(is.numeric(clado_rate))
+    return(clado_rate)
+  }else{
+    num_spec_trait1 <- length(which(island_spec[, 8] == "1"))
+    num_spec_trait2 <- length(which(island_spec[, 8] == "2"))
+    clado_rate1 <- max(
+      0, lac * num_spec_trait1 * (1 - num_spec / K),
+      na.rm = TRUE)
+    clado_rate2 <- max(
+      0, trait_pars$clado_rate2 * num_spec_trait2 * (1 - num_spec / K),
+      na.rm = TRUE
+    )
+    # testit::assert(clado_rate1 >= 0)
+    # testit::assert(clado_rate2 >= 0)
+    # testit::assert(is.numeric(clado_rate1))
+    # testit::assert(is.numeric(clado_rate2))
+    clado_list <- list(clado_rate1 = clado_rate1,
+                       clado_rate2 = clado_rate2)
+    return(clado_list)
+  }
+}
+
+#' Calculate immigration rate
+#' @description Internal function.
+#' Calculates the immigration rate given the current number of
+#' species in the system, the carrying capacity
+#'
+#' @inheritParams default_params_doc
+#'
+#' @keywords internal
+#' @family rate calculations
+#' @author Pedro Neves, Joshua Lambert
+#' @references Valente, Luis M., Rampal S. Etienne, and Albert B. Phillimore.
+#' "The effects of island ontogeny on species diversity and phylogeny."
+#' Proceedings of the Royal Society of London B: Biological Sciences 281.1784 (2014): 20133227.
+get_immig_rate <- function(gam,
+                           A,
+                           num_spec,
+                           K,
+                           mainland_n,
+                           trait_pars = NULL,
+                           island_spec = NULL) {
+
+  if (is.null(trait_pars)) {
+    immig_rate <- max(c(mainland_n * gam * (1 - (num_spec / (A * K))),
+                        0), na.rm = TRUE)
+    return(immig_rate)
+  } else {
+    mainland_n2 <- trait_pars$M2
+    gam2 <- trait_pars$immig_rate2
+    immig_rate1 <- max(c(mainland_n * gam * (1 - (num_spec / (A * K))),
+                         0), na.rm = TRUE)
+    immig_rate2 <- max(c(mainland_n2 * gam2 * (1 - (num_spec / (A * K))),
+                         0), na.rm = TRUE)
+    immig_list <- list(immig_rate1 = immig_rate1,
+                       immig_rate2 = immig_rate2)
+    return(immig_list)
+  }
+}
+
+#' Calculate transition rate
+#' @description Internal function.
+#' Calculates the transition rate given the current number of
+#' immigrant species and the per capita rate.
+#' @param trait_pars A named list containing diversification rates considering
+#' two trait states created by \code{\link{create_trait_pars}}:
+#' \itemize{
+#'   \item{[1]:A numeric with the per capita transition rate with state1}
+#'   \item{[2]:A numeric with the per capita immigration rate with state2}
+#'   \item{[3]:A numeric with the per capita extinction rate with state2}
+#'   \item{[4]:A numeric with the per capita anagenesis rate with state2}
+#'   \item{[5]:A numeric with the per capita cladogenesis rate with state2}
+#'   \item{[6]:A numeric with the per capita transition rate with state2}
+#'   \item{[7]:A numeric with the number of species with trait state 2 on mainland}
+#' }
+#' @param island_spec Matrix with current state of simulation containing number
+#' of species.
+#' @keywords internal
+#' @family rates calculation
+get_trans_rate <- function(trait_pars,
+                           island_spec){
+
+  # Make function accept island_spec matrix or numeric
+  if (is.matrix(island_spec) || is.null(island_spec)) {
+    num_spec_trait1 <- length(which(island_spec[, 8] == "1"))
+    num_spec_trait2 <- length(which(island_spec[, 8] == "2"))
+  }
+  trans_rate1 <- trait_pars$trans_rate * num_spec_trait1
+  trans_rate2 <- trait_pars$trans_rate2 * num_spec_trait2
+  # testit::assert(is.numeric(trans_rate1))
+  # testit::assert(trans_rate1 >= 0)
+  # testit::assert(is.numeric(trans_rate2))
+  # testit::assert(trans_rate2 >= 0)
+  trans_list <- list(trans_rate1 = trans_rate1,
+                     trans_rate2 = trans_rate2)
+  return(trans_list)
+
+}
+
+#' Calculates when the next timestep will be.
+#'
+#' @param timeval current time of simulation
+#' @param max_rates named list of max rates as returned by
+#' \code{\link{update_rates}}.
+#'
+#' @return named list with numeric vector containing the time of the next
+#' timestep and the change in time.
+#'
+#' @keywords internal
+#'
+#' @author Joshua Lambert, Pedro Neves, Shu Xie
+calc_next_timeval <- function(max_rates, timeval) {
+  # testit::assert(timeval >= 0)
+
+  if (length(max_rates) == 4) {   ## no considering about two trait states
+    totalrate <- max_rates[[1]] + max_rates[[2]] + max_rates[[3]] + max_rates[[4]]
+  } else {
+    totalrate <- max_rates[[1]] + max_rates[[2]] + max_rates[[3]] + max_rates[[4]] +
+      max_rates[[5]] + max_rates[[6]] + max_rates[[7]] + max_rates[[8]] +
+      max_rates[[9]] + max_rates[[10]]
+  }
+  dt <- stats::rexp(1, totalrate)
+  timeval <- timeval + dt
+  return(list(timeval = timeval, dt = dt))
+}
+
+
+#' Calculates when the next timestep will be, and if a shift has occured.
+#'
+#' @param timeval current time of simulation
+#' @param max_rates named list of max rates as returned by
+#' \code{\link{update_rates}}.
+#' @param dynamic_shift_times numeric vector of times of rate shifts.
+#'
+#' @return named list with numeric vector containing the time of the next
+#' timestep and the change in time.
+#' @keywords internal
+#'
+#' @author Joshua Lambert, Pedro Neves, Shu Xie
+calc_next_timeval_shift <- function(max_rates,
+                                    timeval,
+                                    dynamic_shift_times) {
+  # testit::assert(timeval >= 0)
+  totalrate <- max_rates[[1]] + max_rates[[2]] + max_rates[[3]] + max_rates[[4]]
+  dt <- stats::rexp(1, totalrate)
+  timeval <- timeval + dt
+  rate_shift <- FALSE
+
+  if (timeval >= dynamic_shift_times[1]) {
+    timeval <- dynamic_shift_times[1]
+    dynamic_shift_times <- dynamic_shift_times[-1]
+    rate_shift <- TRUE
+  }
+
+  out <- list(
+    timeval = timeval,
+    dt = dt,
+    dynamic_shift_times = dynamic_shift_times,
+    rate_shift = rate_shift
+  )
+  return(out)
+}
+
+#' Calculates the area at a point in time from a beta function
+#'
+#' @inheritParams default_params_doc
+#'
+#' @keywords internal
+#'
+#' @author Joshua Lambert, Pedro Neves, Shu Xie
+#'
+#' @return Numeric
+calc_Abeta <- function(proptime,
+                       proptime_max,
+                       peak,
+                       Amax) {
+  f <- proptime_max / (1 - proptime_max)
+  a <- f * peak / (1 + f)
+  b <- peak / (1 + f)
+  At <- Amax * proptime ^ a *
+    (1 - proptime) ^ b / ((a / (a + b)) ^ a * (b / (a + b)) ^ b)
+  return(At)
+}
+
+#' Calculates the peak of ontogeny curve (beta function)
+#'
+#' @inheritParams default_params_doc
+#'
+#' @keywords internal
+#'
+#' @return numeric
+calc_peak <- function(total_time,
+                      area_pars) {
+  Amax <- area_pars$max_area
+  Acurr <- area_pars$current_area
+  proptime_max <- area_pars$proportional_peak_t
+  proptime_curr <- total_time / area_pars$total_island_age
+  # testit::assert(Acurr <= Amax)
+  # testit::assert(proptime_max <= 1 & proptime_max >= 0)
+  # testit::assert(proptime_curr <= 1 & proptime_curr >= 0)
+
+  Abeta2 <- function(x) {
+    calc_Abeta(proptime_curr, proptime_max, x, Amax) - Acurr
+  }
+  peak <- stats::uniroot(Abeta2, c(0.01, 1000))$root
+  # testit::assert(is.numeric(peak))
+  # testit::assert(is.finite(peak))
+  return(peak)
+}
+
+
+#' Samples what event to happen next
+#'
+#' @inheritParams default_params_doc
+#'
+#' @return numeric indicating what event will happen, or a supposed event that
+#' would happen in some timesteps of the ontogeny algorithm.
+#' \itemize{
+#'   \item{[1]: immigration event with trait1}
+#'   \item{[2]: extinction event with trait1}
+#'   \item{[3]: cladogenesis event with trait1}
+#'   \item{[4]: anagenesis event with trait1}
+#'   \item{[5]: transition event with trait1}
+#'   \item{[6]: immigration event with trait2}
+#'   \item{[7]: extinction event with trait2}
+#'   \item{[8]: cladogenesis event with trait2}
+#'   \item{[9]: anagenesis event with trait2}
+#'   \item{[10]: transition event with trait2}
+#' }
+#' @author Shu Xie
+#' @keywords internal
+DAISIE_sample_event_trait_dep <- function(rates) {
+  # testit::assert(are_rates(rates))
+  possible_event <- sample(x = 1:10,
+                           size = 1,
+                           replace = FALSE,
+                           prob = c(rates$immig_rate,
+                                    rates$ext_rate,
+                                    rates$ana_rate,
+                                    rates$clado_rate,
+                                    rates$trans_rate,
+                                    rates$immig_rate2,
+                                    rates$ext_rate2,
+                                    rates$ana_rate2,
+                                    rates$clado_rate2,
+                                    rates$trans_rate2)
+  )
+  # testit::assert(is.numeric(possible_event))
+  # testit::assert(possible_event >= 1)
+  return(possible_event)
+}
+
+#' testing function
+#' @param island_spec island_spec
+#' @param extinct index
+#' @return island spec
+#' @export
+DAISIE_test_execute_extinction <- function(island_spec,
+                                           extinct) {
+
+
+  typeofspecies = island_spec[extinct,4]
+
+  if(typeofspecies == "I")
+  {
+    island_spec = island_spec[-extinct,]
+  }
+  #remove immigrant
+
+  if(typeofspecies == "A")
+  {
+    island_spec = island_spec[-extinct,]
+  }
+  #remove anagenetic
+
+  if(typeofspecies == "C")
+  {
+    #remove cladogenetic
+    #first find species with same ancestor AND arrival total_time
+    sisters = intersect(which(island_spec[,2] == island_spec[extinct,2]),which(island_spec[,3] == island_spec[extinct,3]))
+    survivors = sisters[which(sisters != extinct)]
+
+    if(length(sisters) == 2)
+    {
+      #survivors status becomes anagenetic
+      island_spec[survivors, 4] = "A"
+      island_spec[survivors, c(5,6)] = c(NA,NA)
+      island_spec[survivors,7] = "Clado_extinct"
+      island_spec = island_spec[-extinct,]
+    }
+
+    if(length(sisters) >= 3)
+    {
+      numberofsplits = nchar(island_spec[extinct, 5])
+
+      mostrecentspl = substring(island_spec[extinct,5],numberofsplits)
+
+      if(mostrecentspl=="B")
+      {
+        sistermostrecentspl = "A"
+      }
+      if(mostrecentspl=="A")
+      {
+        sistermostrecentspl = "B"
+      }
+
+      motiftofind = paste(substring(island_spec[extinct,5],1,numberofsplits-1),sistermostrecentspl,sep = "")
+
+      possiblesister = survivors[which(substring(island_spec[survivors,5],1,numberofsplits) == motiftofind)]
+
+      #different rules depending on whether a B or A is removed. B going extinct is simpler because it only
+      #carries a record of the most recent speciation
+      if(mostrecentspl == "A") {
+        #change the splitting date of the sister species so that it inherits the early splitting that used to belong to A.
+        tochange = possiblesister[which(island_spec[possiblesister,6] == min(as.numeric(island_spec[possiblesister,6])))]
+        island_spec[tochange,6] = island_spec[extinct,6]
+      }
+
+      #remove the offending A/B from these species
+      island_spec[possiblesister,5] = paste(
+        substring(island_spec[possiblesister,5], 1, numberofsplits - 1),
+        substring(island_spec[possiblesister,5], numberofsplits + 1, nchar(island_spec[possiblesister,5])),sep = "")
+      island_spec = island_spec[-extinct,]
+    }
+  }
+  island_spec = rbind(island_spec)
+  return(island_spec)
+}

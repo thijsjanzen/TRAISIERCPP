@@ -5,13 +5,13 @@
 \title{Create named list of area parameters}
 \usage{
 create_area_pars(
-  max_area,
-  current_area,
-  proportional_peak_t,
-  total_island_age,
-  sea_level_amplitude,
-  sea_level_frequency,
-  island_gradient_angle
+  max_area = 1,
+  current_area = 1,
+  proportional_peak_t = 0.5,
+  total_island_age = 5,
+  sea_level_amplitude = 1,
+  sea_level_frequency = 1,
+  island_gradient_angle = 0.45
 )
 }
 \arguments{

@@ -7,9 +7,9 @@ enum class species {A, B};
 
 struct island_spec_row {
   // 1
-  double parent = -1.0;
+  double id = -1.0;
   // 2
-  double parent2 = -1.0;
+  double parent = -1.0;
   // 3
   double colonisation_time = -1.0;
   // 4
@@ -24,14 +24,25 @@ struct island_spec_row {
   int trait;
 
   island_spec_row() {
-    parent = -1; parent2 = -1;
+    parent = -1;
+    id = -1;
     colonisation_time = -1.0;
     extinction_time = -1.0;
   }
 
   island_spec_row(double colonist, double timeval, species_type st, int trait_val) {
     parent = colonist;
-    parent2 = colonist;
+    id = colonist;
+    colonisation_time = timeval;
+    type_species = st;
+    trait = trait_val;
+  }
+
+  island_spec_row(int id_,
+                  double parent_,
+                  double timeval, species_type st, int trait_val) {
+    parent = parent_;
+    id = id_;
     colonisation_time = timeval;
     type_species = st;
     trait = trait_val;

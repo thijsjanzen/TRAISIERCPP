@@ -69,7 +69,6 @@ test_that("update_rates", {
                                                island_spec_R,
                                                trait_pars)
 
-
   testthat::expect_equal(reference_value$immig_rate,
                          rcpp_value[[1]])
   testthat::expect_equal(reference_value$ext_rate,

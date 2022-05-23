@@ -165,6 +165,30 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// test_extinction
+Rcpp::StringMatrix test_extinction(const Rcpp::StringMatrix& island_spec_R, int focal_trait);
+RcppExport SEXP _TRAISIERCPP_test_extinction(SEXP island_spec_RSEXP, SEXP focal_traitSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::StringMatrix& >::type island_spec_R(island_spec_RSEXP);
+    Rcpp::traits::input_parameter< int >::type focal_trait(focal_traitSEXP);
+    rcpp_result_gen = Rcpp::wrap(test_extinction(island_spec_R, focal_trait));
+    return rcpp_result_gen;
+END_RCPP
+}
+// test_execute_extinction
+Rcpp::StringMatrix test_execute_extinction(const Rcpp::StringMatrix& island_spec_R, int index);
+RcppExport SEXP _TRAISIERCPP_test_execute_extinction(SEXP island_spec_RSEXP, SEXP indexSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::StringMatrix& >::type island_spec_R(island_spec_RSEXP);
+    Rcpp::traits::input_parameter< int >::type index(indexSEXP);
+    rcpp_result_gen = Rcpp::wrap(test_execute_extinction(island_spec_R, index));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_TRAISIERCPP_sample_event", (DL_FUNC) &_TRAISIERCPP_sample_event, 1},
@@ -177,6 +201,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_TRAISIERCPP_test_update_rates", (DL_FUNC) &_TRAISIERCPP_test_update_rates, 12},
     {"_TRAISIERCPP_test_draw_prop", (DL_FUNC) &_TRAISIERCPP_test_draw_prop, 1},
     {"_TRAISIERCPP_test_immigration", (DL_FUNC) &_TRAISIERCPP_test_immigration, 3},
+    {"_TRAISIERCPP_test_extinction", (DL_FUNC) &_TRAISIERCPP_test_extinction, 2},
+    {"_TRAISIERCPP_test_execute_extinction", (DL_FUNC) &_TRAISIERCPP_test_execute_extinction, 2},
     {NULL, NULL, 0}
 };
 

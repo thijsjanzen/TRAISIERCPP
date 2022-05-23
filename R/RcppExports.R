@@ -126,3 +126,21 @@ test_immigration <- function(timeval, mainland_spec_R, island_spec_R) {
     .Call('_TRAISIERCPP_test_immigration', PACKAGE = 'TRAISIERCPP', timeval, mainland_spec_R, island_spec_R)
 }
 
+#' test extinction
+#' @param island_spec_R island spec table
+#' @param focal_trait focal trait
+#' @return island spec table
+#' @export
+test_extinction <- function(island_spec_R, focal_trait) {
+    .Call('_TRAISIERCPP_test_extinction', PACKAGE = 'TRAISIERCPP', island_spec_R, focal_trait)
+}
+
+#' test execute extinction without rng
+#' @param island_spec_R island spec table
+#' @param index index
+#' @return island spec table
+#' @export
+test_execute_extinction <- function(island_spec_R, index) {
+    .Call('_TRAISIERCPP_test_execute_extinction', PACKAGE = 'TRAISIERCPP', island_spec_R, index)
+}
+
