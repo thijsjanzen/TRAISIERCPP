@@ -361,16 +361,16 @@ void DAISIE_sim_update_state_trait_dep(double timeval,
                                        std::vector< std::array<double, 7>>& stt_table) {
 
   switch(event) {
-  case 1: { immigration(timeval, mainland_spec, is); break;}
-  case 2: { extinction(is, 1); break;}
-  case 3: { anagenesis(is, maxspecID, 1); break;}
-  case 4: { cladogenesis(is, maxspecID, timeval, 1); break;}
-  case 5: { transition(is, 1); break;}
-  case 6: { immigration_state2(is, mainland_spec, timeval, trait_pars.M2); break;}
-  case 7: { extinction(is, 2); break;}
-  case 8: { anagenesis(is, maxspecID, 2); break;}
-  case 9: { cladogenesis(is, maxspecID, timeval, 2); break;}
-  case 10:{ transition(is, 2); break;}
+    case 1: { immigration(timeval, mainland_spec, is); break;}
+    case 2: { extinction(is, 1); break;}
+    case 3: { anagenesis(is, maxspecID, 1); break;}
+    case 4: { cladogenesis(is, maxspecID, timeval, 1); break;}
+    case 5: { transition(is, 1); break;}
+    case 6: { immigration_state2(is, mainland_spec, timeval, trait_pars.M2); break;}
+    case 7: { extinction(is, 2); break;}
+    case 8: { anagenesis(is, maxspecID, 2); break;}
+    case 9: { cladogenesis(is, maxspecID, timeval, 2); break;}
+    case 10:{ transition(is, 2); break;}
   }
 
   if (total_time >= timeval) {
@@ -386,10 +386,8 @@ void DAISIE_sim_update_state_trait_dep(double timeval,
     }
 
     std::array<double, 7> add =
-      { total_time - timeval, nI1, nA1, nC1, nI2, nA2, nC2};
+                          { total_time - timeval, nI1, nA1, nC1, nI2, nA2, nC2};
     stt_table.push_back(add);
-
-
   }
   return;
 }

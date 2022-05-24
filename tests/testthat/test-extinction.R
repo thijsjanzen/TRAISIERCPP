@@ -1,7 +1,6 @@
 context("extinction")
 
 test_that("extinction full", {
-  testthat::skip("ongoing development")
   set.seed(1)
   island_spec_R <- TRAISIERCPP::create_island_spec(time = 5,
                                                    mainland_n = 10,
@@ -21,7 +20,7 @@ test_that("extinction full", {
   island_spec_R2 <- island_spec_R
   island_spec_R2[is.na(island_spec_R2[, 5]), 5] <- "D"
 
-  for (index in 1:length(island_spec_R[, 1])) {
+  for (index in 1:length(island_spec_R2[, 1])) {
     table1 <- TRAISIERCPP::DAISIE_test_execute_extinction(island_spec_R,
                                                           index)
     table2 <- TRAISIERCPP::test_execute_extinction(island_spec_R2,

@@ -29,13 +29,16 @@ island_spec create_island_spec(const Rcpp::StringMatrix& island_spec_R) {
     std::string s_tv = Rcpp::as<std::string>(island_spec_R(i, 7));
     int trait_val = std::stoi(s_tv);
 
+    std::string s_par = Rcpp::as<std::string>(island_spec_R(i, 1));
+    int parent = std::stoi(s_par);
+
     std::string spec_type = Rcpp::as<std::string>(island_spec_R(i, 3));
     species_type local_spec_type;
     if (spec_type == "I") local_spec_type = species_type::I;
     if (spec_type == "C") local_spec_type = species_type::C;
     if (spec_type == "A") local_spec_type = species_type::A;
 
-    island_spec_row to_add(colonist, timeval, local_spec_type, trait_val);
+    island_spec_row to_add(colonist, parent, timeval, local_spec_type, trait_val);
 
     std::string motif = Rcpp::as<std::string>(island_spec_R(i, 4));
     for (char& c : motif) {

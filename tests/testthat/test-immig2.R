@@ -38,7 +38,7 @@ test_that("immigration2", {
   mainland_spec <- c(1)
   island_spec <- rbind(rep("1", 8),
                        rep("1", 8))
-  island_spec[4] <- "I"
+  island_spec[, 4] <- "I"
 
   res <- TRAISIERCPP::test_immigration2(island_spec,
                                        mainland_spec,
