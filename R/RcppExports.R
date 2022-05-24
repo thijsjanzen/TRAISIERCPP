@@ -174,3 +174,23 @@ test_transition <- function(island_spec_R, focal_trait) {
     .Call('_TRAISIERCPP_test_transition', PACKAGE = 'TRAISIERCPP', island_spec_R, focal_trait)
 }
 
+#' test sample spec
+#' @param mainland_spec mainland spec table
+#' @param M2 number species of trait 2 on mainland
+#' @return species index
+#' @export
+test_sample_spec <- function(mainland_spec_R, M2) {
+    .Call('_TRAISIERCPP_test_sample_spec', PACKAGE = 'TRAISIERCPP', mainland_spec_R, M2)
+}
+
+#' test immigration2
+#' @param island_spec_R island spec table
+#' @param mainland_spec_R mainland species vector
+#' @param timeval timeval
+#' @param M2 M2
+#' @return island spec table
+#' @export
+test_immigration2 <- function(island_spec_R, mainland_spec_R, timeval, M2) {
+    .Call('_TRAISIERCPP_test_immigration2', PACKAGE = 'TRAISIERCPP', island_spec_R, mainland_spec_R, timeval, M2)
+}
+

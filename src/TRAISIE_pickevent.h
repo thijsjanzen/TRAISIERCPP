@@ -155,13 +155,10 @@ T draw_from(const std::vector<T>& v) {
 }
 
 
-
-void immigration(double timeval,
-                 const std::vector<double>& mainland_spec,
-                 island_spec& is) {
-
-  int colonist = draw_prop(mainland_spec);
-
+void execute_immigration(island_spec& is,
+                         double timeval,
+                         int colonist,
+                         int focal_trait) {
   int is_it_there = -1;
   if (!is.empty()) {
     for (size_t i = 0; i < is.size(); ++i) {
@@ -172,13 +169,26 @@ void immigration(double timeval,
     }
   }
 
-  island_spec_row add(colonist, timeval, species_type::I, 1);
+  island_spec_row add(colonist, timeval, species_type::I, focal_trait);
 
   if (is_it_there == -1) { // it is not there
     is.push_back(add);
   } else {
     is[is_it_there] = add;
   }
+  return;
+}
+
+
+
+void immigration(double timeval,
+                 const std::vector<double>& mainland_spec,
+                 island_spec& is) {
+
+  int colonist = draw_prop(mainland_spec);
+
+  execute_immigration(is, timeval, colonist, 1);
+
   return;
 }
 
@@ -319,34 +329,25 @@ void transition(island_spec& is,
   return;
 }
 
-void immigration_state2(island_spec& is,
-                        std::vector<double> mainland_spec,
-                        double timeval,
-                        const rates& trait_pars) {
 
+
+int sample_spec(const std::vector<double>& mainland_spec,
+                int mainland2) {
   auto mainland1 = mainland_spec.size();
-  auto mainland2 = trait_pars.M2;
   //  auto mainland_total = mainland1 + mainland2;
   int index = static_cast<int>(R::runif(0, mainland2));
   auto colonist = index + mainland1 + 1;
+  return colonist;
+}
 
-  int is_it_there = -1;
-  if (!is.empty()) {
-    for (size_t i = 0; i < is.size(); ++i) {
-      if (is[i].parent == colonist) {
-        is_it_there = i;
-        break;
-      }
-    }
-  }
+void immigration_state2(island_spec& is,
+                        std::vector<double> mainland_spec,
+                        double timeval,
+                        const int M2) {
 
-  island_spec_row add(colonist, timeval, species_type::I, 2);
+  int colonist = sample_spec(mainland_spec, M2);
+  execute_immigration(is, timeval, colonist, 2);
 
-  if (is_it_there == -1) { // it is not there
-    is.push_back(add);
-  } else {
-    is[is_it_there] = add;
-  }
   return;
 }
 
@@ -365,7 +366,7 @@ void DAISIE_sim_update_state_trait_dep(double timeval,
   case 3: { anagenesis(is, maxspecID, 1); break;}
   case 4: { cladogenesis(is, maxspecID, timeval, 1); break;}
   case 5: { transition(is, 1); break;}
-  case 6: { immigration_state2(is, mainland_spec, timeval, trait_pars); break;}
+  case 6: { immigration_state2(is, mainland_spec, timeval, trait_pars.M2); break;}
   case 7: { extinction(is, 2); break;}
   case 8: { anagenesis(is, maxspecID, 2); break;}
   case 9: { cladogenesis(is, maxspecID, timeval, 2); break;}

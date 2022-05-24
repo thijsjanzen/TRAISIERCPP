@@ -170,6 +170,44 @@ Rcpp::StringMatrix test_transition(Rcpp::StringMatrix& island_spec_R,
   return out;
 }
 
+//' test sample spec
+//' @param mainland_spec mainland spec table
+//' @param M2 number species of trait 2 on mainland
+//' @return species index
+//' @export
+// [[Rcpp::export]]
+int test_sample_spec(const Rcpp::NumericVector& mainland_spec_R,
+                     int M2) {
+  std::vector<double> mainland_spec(mainland_spec_R.begin(),
+                                    mainland_spec_R.end());
+  return sample_spec(mainland_spec, M2);
+}
+
+//' test immigration2
+//' @param island_spec_R island spec table
+//' @param mainland_spec_R mainland species vector
+//' @param timeval timeval
+//' @param M2 M2
+//' @return island spec table
+//' @export
+// [[Rcpp::export]]
+Rcpp::StringMatrix test_immigration2(Rcpp::StringMatrix& island_spec_R,
+                                     const Rcpp::NumericVector& mainland_spec_R,
+                                     double timeval,
+                                     int M2) {
+  island_spec island_spec_ = create_island_spec(island_spec_R);
+  std::vector<double> mainland_spec(mainland_spec_R.begin(),
+                                    mainland_spec_R.end());
+  immigration_state2(island_spec_,
+                     mainland_spec,
+                     timeval,
+                     M2);
+
+  Rcpp::StringMatrix  out = make_island_spec_for_R(island_spec_);
+  return out;
+}
+
+
 
 
 

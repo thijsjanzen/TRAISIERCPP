@@ -228,6 +228,32 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// test_sample_spec
+int test_sample_spec(const Rcpp::NumericVector& mainland_spec_R, int M2);
+RcppExport SEXP _TRAISIERCPP_test_sample_spec(SEXP mainland_spec_RSEXP, SEXP M2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type mainland_spec_R(mainland_spec_RSEXP);
+    Rcpp::traits::input_parameter< int >::type M2(M2SEXP);
+    rcpp_result_gen = Rcpp::wrap(test_sample_spec(mainland_spec_R, M2));
+    return rcpp_result_gen;
+END_RCPP
+}
+// test_immigration2
+Rcpp::StringMatrix test_immigration2(Rcpp::StringMatrix& island_spec_R, const Rcpp::NumericVector& mainland_spec_R, double timeval, int M2);
+RcppExport SEXP _TRAISIERCPP_test_immigration2(SEXP island_spec_RSEXP, SEXP mainland_spec_RSEXP, SEXP timevalSEXP, SEXP M2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::StringMatrix& >::type island_spec_R(island_spec_RSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type mainland_spec_R(mainland_spec_RSEXP);
+    Rcpp::traits::input_parameter< double >::type timeval(timevalSEXP);
+    Rcpp::traits::input_parameter< int >::type M2(M2SEXP);
+    rcpp_result_gen = Rcpp::wrap(test_immigration2(island_spec_R, mainland_spec_R, timeval, M2));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_TRAISIERCPP_sample_event", (DL_FUNC) &_TRAISIERCPP_sample_event, 1},
@@ -245,6 +271,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_TRAISIERCPP_test_anagenesis", (DL_FUNC) &_TRAISIERCPP_test_anagenesis, 3},
     {"_TRAISIERCPP_test_cladogenesis", (DL_FUNC) &_TRAISIERCPP_test_cladogenesis, 4},
     {"_TRAISIERCPP_test_transition", (DL_FUNC) &_TRAISIERCPP_test_transition, 2},
+    {"_TRAISIERCPP_test_sample_spec", (DL_FUNC) &_TRAISIERCPP_test_sample_spec, 2},
+    {"_TRAISIERCPP_test_immigration2", (DL_FUNC) &_TRAISIERCPP_test_immigration2, 4},
     {NULL, NULL, 0}
 };
 
