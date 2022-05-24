@@ -1,7 +1,7 @@
 Package: TRAISIERCPP
 Type: Package
 Title: Test RCPP Version TRAISIE
-Version: 0.2
+Version: 0.5
 Date: 2022-05-11
 Author: Thijs Janzen
 Maintainer: Thijs Janzen <t.janzen@rug.nl>
