@@ -77,6 +77,5 @@ test_that("cladogenesis", {
 
     tail_spec <- res[3, 5]
     testthat::expect_equal(tail_spec, "B")
-  }
 })
 

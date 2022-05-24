@@ -1,6 +1,7 @@
 context("extinction")
 
 test_that("extinction full", {
+  testthat::skip("ongoing development")
   set.seed(1)
   island_spec_R <- TRAISIERCPP::create_island_spec(time = 5,
                                                    mainland_n = 10,
