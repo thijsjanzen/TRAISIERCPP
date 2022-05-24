@@ -228,7 +228,6 @@ void anagenesis(island_spec& is,
     }
   }
 
-
   size_t anagenesis = immi_specs[0];
 
   if (immi_specs.size() > 1) {
@@ -260,7 +259,7 @@ void cladogenesis(island_spec& is,
 
   if (is[to_split].type_species == species_type::C) {
     // for daughter A
-    is[to_split].type_species = species_type::C; // redunandant, but following R
+    is[to_split].type_species = species_type::C; // redundant, but following R
     is[to_split].parent = maxspecID + 1;
     auto oldstatus = is[to_split].anc_type;
     is[to_split].anc_type.push_back(species::A);
@@ -272,7 +271,8 @@ void cladogenesis(island_spec& is,
     add.parent = is[to_split].parent;
     add.colonisation_time = is[to_split].colonisation_time;
     add.type_species = species_type::C;
-    add.anc_type = oldstatus; add.anc_type.push_back(species::B);
+    add.anc_type = oldstatus;
+    add.anc_type.push_back(species::B);
     add.extinction_time = timeval;
     add.trait = focal_trait;
     is.push_back(add);

@@ -154,3 +154,14 @@ test_anagenesis <- function(island_spec_R, maxspecID, focal_trait) {
     .Call('_TRAISIERCPP_test_anagenesis', PACKAGE = 'TRAISIERCPP', island_spec_R, maxspecID, focal_trait)
 }
 
+#' test execute cladogenesis
+#' @param island_spec_R island spec table
+#' @param timeval timeval
+#' @param maxspecID maxspecid
+#' @param focal_trait focaltrait
+#' @return island spec table
+#' @export
+test_cladogenesis <- function(island_spec_R, timeval, maxspecID, focal_trait) {
+    .Call('_TRAISIERCPP_test_cladogenesis', PACKAGE = 'TRAISIERCPP', island_spec_R, timeval, maxspecID, focal_trait)
+}
+

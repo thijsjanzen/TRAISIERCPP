@@ -202,6 +202,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// test_cladogenesis
+Rcpp::StringMatrix test_cladogenesis(Rcpp::StringMatrix& island_spec_R, double timeval, int maxspecID, int focal_trait);
+RcppExport SEXP _TRAISIERCPP_test_cladogenesis(SEXP island_spec_RSEXP, SEXP timevalSEXP, SEXP maxspecIDSEXP, SEXP focal_traitSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::StringMatrix& >::type island_spec_R(island_spec_RSEXP);
+    Rcpp::traits::input_parameter< double >::type timeval(timevalSEXP);
+    Rcpp::traits::input_parameter< int >::type maxspecID(maxspecIDSEXP);
+    Rcpp::traits::input_parameter< int >::type focal_trait(focal_traitSEXP);
+    rcpp_result_gen = Rcpp::wrap(test_cladogenesis(island_spec_R, timeval, maxspecID, focal_trait));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_TRAISIERCPP_sample_event", (DL_FUNC) &_TRAISIERCPP_sample_event, 1},
@@ -217,6 +231,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_TRAISIERCPP_test_extinction", (DL_FUNC) &_TRAISIERCPP_test_extinction, 2},
     {"_TRAISIERCPP_test_execute_extinction", (DL_FUNC) &_TRAISIERCPP_test_execute_extinction, 2},
     {"_TRAISIERCPP_test_anagenesis", (DL_FUNC) &_TRAISIERCPP_test_anagenesis, 3},
+    {"_TRAISIERCPP_test_cladogenesis", (DL_FUNC) &_TRAISIERCPP_test_cladogenesis, 4},
     {NULL, NULL, 0}
 };
 

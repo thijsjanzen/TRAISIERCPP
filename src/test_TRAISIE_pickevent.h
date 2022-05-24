@@ -138,6 +138,23 @@ Rcpp::StringMatrix test_anagenesis(Rcpp::StringMatrix& island_spec_R,
   return out;
 }
 
+//' test execute cladogenesis
+//' @param island_spec_R island spec table
+//' @param timeval timeval
+//' @param maxspecID maxspecid
+//' @param focal_trait focaltrait
+//' @return island spec table
+//' @export
+// [[Rcpp::export]]
+Rcpp::StringMatrix test_cladogenesis(Rcpp::StringMatrix& island_spec_R,
+                                     double timeval,
+                                     int maxspecID,
+                                     int focal_trait) {
+  island_spec island_spec_ = create_island_spec(island_spec_R);
+  cladogenesis(island_spec_, timeval, maxspecID, focal_trait);
+  Rcpp::StringMatrix  out = make_island_spec_for_R(island_spec_);
+  return out;
+}
 
 
 
