@@ -4,4 +4,4 @@
 
 Branch | Coverage
 ---|---
-master |[![codecov.io](https://codecov.io/gh/thijsjanzen/TRAISIERCPP/branch/master/graph/badge.svg)](https://app.codecov.io/gh/thijsjanzen/TRAISIERCPP)
+main |[![codecov.io](https://codecov.io/gh/thijsjanzen/TRAISIERCPP/branch/main/graph/badge.svg)](https://app.codecov.io/gh/thijsjanzen/TRAISIERCPP)
