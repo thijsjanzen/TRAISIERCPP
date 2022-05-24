@@ -1,10 +1,6 @@
 context("extinction")
 
-
-
-
-
-test_that("extinction clado?", {
+test_that("extinction full", {
   set.seed(1)
   island_spec_R <- TRAISIERCPP::create_island_spec(time = 5,
                                                    mainland_n = 10,
@@ -23,12 +19,6 @@ test_that("extinction clado?", {
 
   island_spec_R2 <- island_spec_R
   island_spec_R2[is.na(island_spec_R2[, 5]), 5] <- "D"
-
-# island_spec <- island_spec_R
-#  extinct <- 7
-# index <- extinct
-#  table2 <- TRAISIERCPP::test_execute_extinction(island_spec_R2,
-#                                                 index)
 
   for (index in 1:length(island_spec_R[, 1])) {
     table1 <- TRAISIERCPP::DAISIE_test_execute_extinction(island_spec_R,

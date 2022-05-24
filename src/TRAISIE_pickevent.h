@@ -228,14 +228,14 @@ void anagenesis(island_spec& is,
     }
   }
 
-  auto anagenesis = immi_specs[0];
+
+  size_t anagenesis = immi_specs[0];
 
   if (immi_specs.size() > 1) {
     int index = static_cast<int>(R::runif(0, immi_specs.size()));
     anagenesis = immi_specs[index];
   }
-
-  maxspecID++;
+   maxspecID++;
 
   is[anagenesis].type_species = species_type::A;
   is[anagenesis].parent = maxspecID;

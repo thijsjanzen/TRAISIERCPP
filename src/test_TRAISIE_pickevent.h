@@ -16,6 +16,40 @@ int test_draw_prop(const Rcpp::NumericVector& v) {
   return x;
 }
 
+island_spec create_island_spec(const Rcpp::StringMatrix& island_spec_R) {
+  island_spec island_spec_;
+  for (size_t i = 0; i < island_spec_R.nrow(); ++i) {
+
+    std::string s_c = Rcpp::as<std::string>(island_spec_R(i, 0));
+    int colonist = std::stoi(s_c);
+
+    std::string s_t = Rcpp::as<std::string>(island_spec_R(i, 2));
+    double timeval = std::stod(s_t);
+
+    std::string s_tv = Rcpp::as<std::string>(island_spec_R(i, 7));
+    int trait_val = std::stoi(s_tv);
+
+    std::string spec_type = Rcpp::as<std::string>(island_spec_R(i, 3));
+    species_type local_spec_type;
+    if (spec_type == "I") local_spec_type = species_type::I;
+    if (spec_type == "C") local_spec_type = species_type::C;
+    if (spec_type == "A") local_spec_type = species_type::A;
+
+    island_spec_row to_add(colonist, timeval, local_spec_type, trait_val);
+
+    std::string motif = Rcpp::as<std::string>(island_spec_R(i, 4));
+    for (char& c : motif) {
+      if (c == 'A') to_add.anc_type.push_back(species::A);
+      if (c == 'B') to_add.anc_type.push_back(species::B);
+    }
+
+    island_spec_.push_back(to_add);
+  }
+  return island_spec_;
+}
+
+
+
 //' test immigration
 //' @param timeval timeval
 //' @param mainland_spec vector
@@ -60,43 +94,7 @@ Rcpp::StringMatrix test_immigration(double timeval,
 Rcpp::StringMatrix test_extinction(const Rcpp::StringMatrix& island_spec_R,
                                    int focal_trait) {
 
-  island_spec island_spec_;
-  for (size_t i = 0; i < island_spec_R.nrow(); ++i) {
-
-    std::string s_c = Rcpp::as<std::string>(island_spec_R(i, 0));
-    int colonist = std::stoi(s_c);
-    // int colonist = Rcpp::as<int>(island_spec_R(i, 0));
-  //  std::cerr << colonist << " ";
-
-    std::string s_t = Rcpp::as<std::string>(island_spec_R(i, 2));
-    double timeval = std::stod(s_t);
-  //  double timeval  = Rcpp::as<double>(island_spec_R(i, 2));
-  //  std::cerr << timeval << " ";
-
-    std::string s_tv = Rcpp::as<std::string>(island_spec_R(i, 7));
-    int trait_val = std::stoi(s_tv);
-//    int trait_val = Rcpp::as<int>(island_spec_R(i, 7));
- //   std::cerr << trait_val << " ";
-
-    std::string spec_type = Rcpp::as<std::string>(island_spec_R(i, 3));
-    species_type local_spec_type;
-    if (spec_type == "I") local_spec_type = species_type::I;
-    if (spec_type == "C") local_spec_type = species_type::C;
-    if (spec_type == "A") local_spec_type = species_type::A;
-
-  //  std::cerr << spec_type << " " << static_cast<int>(local_spec_type) << "\n";
-
-
-    island_spec_row to_add(colonist, timeval, local_spec_type, trait_val);
-
-    std::string motif = Rcpp::as<std::string>(island_spec_R(i, 4));
-    for (char& c : motif) {
-      if (c == 'A') to_add.anc_type.push_back(species::A);
-      if (c == 'B') to_add.anc_type.push_back(species::B);
-    }
-
-    island_spec_.push_back(to_add);
-  }
+  island_spec island_spec_ = create_island_spec(island_spec_R);
 
   extinction(island_spec_, focal_trait);
 
@@ -113,52 +111,34 @@ Rcpp::StringMatrix test_extinction(const Rcpp::StringMatrix& island_spec_R,
 Rcpp::StringMatrix test_execute_extinction(const Rcpp::StringMatrix& island_spec_R,
                                            int index) {
   index = index - 1;
-  island_spec island_spec_;
-  for (size_t i = 0; i < island_spec_R.nrow(); ++i) {
-
-    std::string s_p = Rcpp::as<std::string>(island_spec_R(i, 1));
-    int parent = std::stoi(s_p);
-    // int colonist = Rcpp::as<int>(island_spec_R(i, 0));
-    //  std::cerr << colonist << " ";
-    //
-    std::string s_id = Rcpp::as<std::string>(island_spec_R(i, 0));
-    int id = std::stoi(s_id);
-
-    std::string s_t = Rcpp::as<std::string>(island_spec_R(i, 2));
-    double timeval = std::stod(s_t);
-    //  double timeval  = Rcpp::as<double>(island_spec_R(i, 2));
-    //  std::cerr << timeval << " ";
-
-    std::string s_tv = Rcpp::as<std::string>(island_spec_R(i, 7));
-    int trait_val = std::stoi(s_tv);
-    //    int trait_val = Rcpp::as<int>(island_spec_R(i, 7));
-    //   std::cerr << trait_val << " ";
-
-    std::string spec_type = Rcpp::as<std::string>(island_spec_R(i, 3));
-    species_type local_spec_type;
-    if (spec_type == "I") local_spec_type = species_type::I;
-    if (spec_type == "C") local_spec_type = species_type::C;
-    if (spec_type == "A") local_spec_type = species_type::A;
-
-    //  std::cerr << spec_type << " " << static_cast<int>(local_spec_type) << "\n";
-
-
-    island_spec_row to_add(id, parent, timeval, local_spec_type, trait_val);
-
-    std::string motif = Rcpp::as<std::string>(island_spec_R(i, 4));
-    for (char& c : motif) {
-      if (c == 'A') to_add.anc_type.push_back(species::A);
-      if (c == 'B') to_add.anc_type.push_back(species::B);
-    }
-
-    island_spec_.push_back(to_add);
-  }
+  island_spec island_spec_ = create_island_spec(island_spec_R);
 
   execute_extinction(island_spec_, index);
 
   Rcpp::StringMatrix  out = make_island_spec_for_R(island_spec_);
   return out;
 }
+
+//' test execute anagenesis
+//' @param island_spec_R island spec table
+//' @param maxspecID maxspecid
+//' @param focal_trait focaltrait
+//' @return island spec table
+//' @export
+// [[Rcpp::export]]
+Rcpp::StringMatrix test_anagenesis(Rcpp::StringMatrix& island_spec_R,
+                                    int maxspecID,
+                                    int focal_trait) {
+
+  island_spec island_spec_ = create_island_spec(island_spec_R);
+
+  anagenesis(island_spec_, maxspecID, focal_trait);
+
+  Rcpp::StringMatrix  out = make_island_spec_for_R(island_spec_);
+  return out;
+}
+
+
 
 
 

@@ -144,3 +144,13 @@ test_execute_extinction <- function(island_spec_R, index) {
     .Call('_TRAISIERCPP_test_execute_extinction', PACKAGE = 'TRAISIERCPP', island_spec_R, index)
 }
 
+#' test execute anagenesis
+#' @param island_spec_R island spec table
+#' @param maxspecID maxspecid
+#' @param focal_trait focaltrait
+#' @return island spec table
+#' @export
+test_anagenesis <- function(island_spec_R, maxspecID, focal_trait) {
+    .Call('_TRAISIERCPP_test_anagenesis', PACKAGE = 'TRAISIERCPP', island_spec_R, maxspecID, focal_trait)
+}
+
