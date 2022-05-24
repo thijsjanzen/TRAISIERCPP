@@ -165,3 +165,12 @@ test_cladogenesis <- function(island_spec_R, timeval, maxspecID, focal_trait) {
     .Call('_TRAISIERCPP_test_cladogenesis', PACKAGE = 'TRAISIERCPP', island_spec_R, timeval, maxspecID, focal_trait)
 }
 
+#' test transition
+#' @param island_spec_R island spec table
+#' @param focal_trait focaltrait
+#' @return island spec table
+#' @export
+test_transition <- function(island_spec_R, focal_trait) {
+    .Call('_TRAISIERCPP_test_transition', PACKAGE = 'TRAISIERCPP', island_spec_R, focal_trait)
+}
+

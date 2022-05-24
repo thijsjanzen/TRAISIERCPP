@@ -156,6 +156,19 @@ Rcpp::StringMatrix test_cladogenesis(Rcpp::StringMatrix& island_spec_R,
   return out;
 }
 
+//' test transition
+//' @param island_spec_R island spec table
+//' @param focal_trait focaltrait
+//' @return island spec table
+//' @export
+// [[Rcpp::export]]
+Rcpp::StringMatrix test_transition(Rcpp::StringMatrix& island_spec_R,
+                                    int focal_trait) {
+  island_spec island_spec_ = create_island_spec(island_spec_R);
+  transition(island_spec_, focal_trait);
+  Rcpp::StringMatrix  out = make_island_spec_for_R(island_spec_);
+  return out;
+}
 
 
 
