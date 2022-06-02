@@ -139,7 +139,7 @@ Rcpp::List execute_time_loop(double timeval,
                                         all_rates.ana_rate2,
                                         all_rates.clado_rate2,
                                         all_rates.trans_rate2});
-
+/*
       std::vector<double> v = {all_rates.immig_rate,
                                all_rates.ext_rate,
                                all_rates.ana_rate,
@@ -154,7 +154,7 @@ Rcpp::List execute_time_loop(double timeval,
       std::cerr << possible_event << " ";
       for (auto i : v) {
         std::cerr << i << " ";
-      } std::cerr << "\n"; force_output();
+      } std::cerr << "\n"; force_output();*/
 
     //  auto possible_event = all_rates.sample_event();
    //   Rcpp::Rcout << possible_event << "\n";

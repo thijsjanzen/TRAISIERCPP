@@ -1705,7 +1705,7 @@ DAISIE_sim_core_trait_dep <- function(
       possible_event <- DAISIE_sample_event_trait_dep(
         rates = rates
       )
-      cat(possible_event, unlist(rates), "\n")
+    #  cat(possible_event, unlist(rates), "\n")
 
       updated_state <- DAISIE_sim_update_state_trait_dep(
         timeval = timeval,
@@ -1739,7 +1739,7 @@ DAISIE_sim_core_trait_dep <- function(
     )
   )
 
-  return(stt_table)
+  return(island_spec)
 }
 
 
