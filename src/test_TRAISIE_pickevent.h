@@ -1,7 +1,6 @@
 #ifndef TEST_TRAISIE_PICKEVENT_H
 #define TEST_TRAISIE_PICKEVENT_H
 
-#include <Rcpp.h>
 #include "TRAISIE_pickevent.h"
 #include "TRAISIE_util.h"
 

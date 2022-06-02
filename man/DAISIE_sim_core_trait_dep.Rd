@@ -110,4 +110,3 @@ rate preventing it from being too large and slowing down simulation.}
 \description{
 Internal function of the DAISIE simulation
 }
-\keyword{internal}

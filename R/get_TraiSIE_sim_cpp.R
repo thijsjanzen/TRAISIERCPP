@@ -9,6 +9,7 @@
 #' @export
 #' @rawNamespace useDynLib(TRAISIERCPP)
 #' @rawNamespace import(Rcpp)
+#' @rawNamespace import(RcppArmadillo)
 get_TraiSIE_sim_cpp <- function(parameters, K, replicates){
   sim <- list()
   for (j in seq_len(replicates)) {

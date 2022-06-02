@@ -1623,7 +1623,7 @@ is_simulation_outputs <- function(simulation_outputs) {
 #' Internal function of the DAISIE simulation
 #'
 #' @inheritParams default_params_doc
-#' @keywords internal
+#' @export
 DAISIE_sim_core_trait_dep <- function(
     time,
     mainland_n,
@@ -1705,6 +1705,7 @@ DAISIE_sim_core_trait_dep <- function(
       possible_event <- DAISIE_sample_event_trait_dep(
         rates = rates
       )
+      cat(possible_event, unlist(rates), "\n")
 
       updated_state <- DAISIE_sim_update_state_trait_dep(
         timeval = timeval,
@@ -1738,7 +1739,7 @@ DAISIE_sim_core_trait_dep <- function(
     )
   )
 
-  return(island_spec)
+  return(stt_table)
 }
 
 

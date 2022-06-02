@@ -15,8 +15,6 @@ void force_output() {
   R_CheckUserInterrupt();
 }
 
-
-
 void remove_species(island_spec& is,
                     int index) {
   is.data_.erase(is.data_.begin() + index);
@@ -24,6 +22,8 @@ void remove_species(island_spec& is,
 
 bool match_motif(const std::vector< species >& anc,
                  const std::vector< species >& motif) {
+
+  if (motif.empty()) return false;
 
   for (size_t i = 0; i < anc.size(); ++i) {
     if (anc[i] == motif[0]) {
@@ -42,7 +42,7 @@ bool match_motif(const std::vector< species >& anc,
 void remove_cladogenetic(island_spec& is,
                          int extinct) {
 
-  // std::cerr << "welcome to remove cladogenetic\n"; force_output();
+ //  std::cerr << "welcome to remove cladogenetic\n"; force_output();
 
   std::vector<size_t> sisters;
   int num_sisters = 0;
@@ -80,13 +80,13 @@ void remove_cladogenetic(island_spec& is,
     if (most_recent_split == species::A) { // for completeness and matching R.
       sister_most_recent_split = species::B;
     }
- //   std::cerr << "starting looking for motif\n"; force_output();
+//    std::cerr << "starting looking for motif\n"; force_output();
  //   std::cerr << is.size() << " " << extinct << "\n"; force_output();
  //   std::cerr << is[extinct].anc_type.size() << "\n"; force_output();
 
     std::vector< species > motif_to_find = is[extinct].anc_type;
 
-//    std::cerr << "starting pop back\n"; force_output();
+ //   std::cerr << "starting pop back\n"; force_output();
     if (!motif_to_find.empty()) motif_to_find.pop_back();
 
  //   std::cerr << "adding sister\n"; force_output();
@@ -109,7 +109,7 @@ void remove_cladogenetic(island_spec& is,
     }
  //   std::cerr << "possible sisters: "; force_output();
  //   for (auto p : possible_sister) {
-//      std::cerr << p << " ";
+ //     std::cerr << p << " ";
 //    } std::cerr << "\n"; force_output();
 
     if (most_recent_split == species::A) {
@@ -154,7 +154,6 @@ T draw_from(const std::vector<T>& v) {
   return v[index];
 }
 
-
 void execute_immigration(island_spec& is,
                          double timeval,
                          int colonist,
@@ -186,9 +185,7 @@ void immigration(double timeval,
                  island_spec& is) {
 
   int colonist = draw_prop(mainland_spec);
-
   execute_immigration(is, timeval, colonist, 1);
-
   return;
 }
 
@@ -196,8 +193,6 @@ void execute_extinction(island_spec& is,
                         int extinct) {
 
   auto type_of_species = is[extinct].type_species;
-
-  // std::cerr << static_cast<int>(type_of_species) << " " << extinct << "\n"; force_output();
 
   if (type_of_species == species_type::I) { // 0 == "I
     remove_species(is, extinct); // island_spec = island_spec[-extinct,]

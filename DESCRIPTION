@@ -13,6 +13,6 @@ Imports: Rcpp (>= 1.0.8),
   testit,
   DDD
 Suggests: testthat
-LinkingTo: Rcpp
+LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 7.2.0
 Encoding: UTF-8

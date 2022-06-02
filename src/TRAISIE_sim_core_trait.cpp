@@ -1,4 +1,7 @@
-#include <Rcpp.h>
+// [[Rcpp::depends(RcppArmadillo)]]
+
+#include <RcppArmadillo.h>
+#include <RcppArmadilloExtensions/sample.h>
 
 #include <vector>
 
@@ -12,6 +15,26 @@
 
 #include "test_TRAISIE_RATES.h"
 #include "test_TRAISIE_pickevent.h"
+
+
+//' function to draw event.
+//' @param event_prob event probability vector
+//' @return event
+//' @export
+// [[Rcpp::export]]
+int sample_event(const std::vector<double>& event_prob) {
+  /*  std::vector<double> event_prob = {immig_rate, ext_rate,
+   ana_rate, clado_rate,
+   trans_rate, immig_rate2,
+   ext_rate2, ana_rate2,
+   clado_rate2,
+   trans_rate2};
+   */
+
+  const std::vector<int> indices = {1, 2, 3, 4, 5, 6, 7, 8 , 9, 10};
+  auto answ = Rcpp::RcppArmadillo::sample(indices, 1, false, event_prob);
+  return answ[0];
+}
 
 double calc_next_time_eval(const rates& r,
                            double timeval) {
@@ -117,6 +140,21 @@ Rcpp::List execute_time_loop(double timeval,
                                         all_rates.clado_rate2,
                                         all_rates.trans_rate2});
 
+      std::vector<double> v = {all_rates.immig_rate,
+                               all_rates.ext_rate,
+                               all_rates.ana_rate,
+                               all_rates.clado_rate,
+                               all_rates.trans_rate,
+                               all_rates.immig_rate2,
+                               all_rates.ext_rate2,
+                               all_rates.ana_rate2,
+                               all_rates.clado_rate2,
+                               all_rates.trans_rate2};
+
+      std::cerr << possible_event << " ";
+      for (auto i : v) {
+        std::cerr << i << " ";
+      } std::cerr << "\n"; force_output();
 
     //  auto possible_event = all_rates.sample_event();
    //   Rcpp::Rcout << possible_event << "\n";
@@ -153,3 +191,6 @@ Rcpp::List execute_time_loop(double timeval,
           Rcpp::Named("island_spec") = island_spec_for_R);
   return output;
 }
+
+
+

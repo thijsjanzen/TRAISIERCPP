@@ -7,33 +7,6 @@
 
 #include "TRAISIE_structs.h"
 
-
-//' function to draw event.
-//' @param event_prob event probability vector
-//' @return event
-//' @export
-// [[Rcpp::export]]
-int sample_event(const std::vector<double>& event_prob) {
-/*  std::vector<double> event_prob = {immig_rate, ext_rate,
-                                    ana_rate, clado_rate,
-                                    trans_rate, immig_rate2,
-                                    ext_rate2, ana_rate2,
-                                    clado_rate2,
-                                    trans_rate2};
-  */
-  double s = std::accumulate(event_prob.begin(), event_prob.end(), 0.0);
-  double r = R::runif(0.0, s);
-  int index = 0;
-
-  for( ; index < event_prob.size(); ++index) {
-    r -= event_prob[index];
-    if (r <= 0.0) {
-      break;
-    }
-  }
-  return index + 1;
-}
-
 two_rates get_immig_rate(double gam,
                          double A,
                          int num_spec,
@@ -43,7 +16,7 @@ two_rates get_immig_rate(double gam,
                          double gam2) {
 
   two_rates immig_rate;
-  immig_rate.rate1 = std::max(mainland_n * gam * (1.0 - (num_spec / (A * K))),
+  immig_rate.rate1 = std::max(mainland_n  * gam  * (1.0 - (num_spec / (A * K))),
                               0.0);
   immig_rate.rate2 = std::max(mainland_n2 * gam2 * (1.0 - (num_spec / (A * K))),
                               0.0);
@@ -59,7 +32,7 @@ two_rates get_ext_rate(double mu,
                        size_t num_spec_trait1,
                        size_t num_spec_trait2) {
   two_rates ext_rate;
-  ext_rate.rate1 = mu * num_spec_trait1;
+  ext_rate.rate1 = mu        * num_spec_trait1;
   ext_rate.rate2 = ext_rate2 * num_spec_trait2;
   return ext_rate;
 }
@@ -69,9 +42,8 @@ two_rates get_ana_rate(double laa,
                        double ana_rate2,
                        size_t num_immig_trait1,
                        size_t num_immig_trait2) {
-
   two_rates ana_rate;
-  ana_rate.rate1 = laa * num_immig_trait1;
+  ana_rate.rate1 = laa       * num_immig_trait1;
   ana_rate.rate2 = ana_rate2 * num_immig_trait2;
   return ana_rate;
 }
@@ -86,10 +58,12 @@ two_rates get_clado_rate(double lac,
 
   two_rates clado_rate;
   clado_rate.rate1 = std::max(0.0,
-                              lac * num_spec_trait1 * (1.0 - num_spec / K) );
+                              lac * num_spec_trait1 *
+                              (1.0 - num_spec / K) );
 
   clado_rate.rate2 = std::max(0.0,
-                              clado_rate2 * num_spec_trait2 * (1.0 - num_spec / K));
+                              clado_rate2 * num_spec_trait2 *
+                              (1.0 - num_spec / K));
   return clado_rate;
 }
 
