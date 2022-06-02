@@ -9,9 +9,9 @@ test_immigration(timeval, mainland_spec_R, island_spec_R)
 \arguments{
 \item{timeval}{timeval}
 
-\item{island_spec_R}{matrix}
+\item{mainland_spec_R}{vector}
 
-\item{mainland_spec}{vector}
+\item{island_spec_R}{matrix}
 }
 \value{
 stringmatrix island_spec

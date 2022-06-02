@@ -126,8 +126,8 @@ Rcpp::NumericVector test_get_trans_rate(double trans_rate,
 //' @param num_spec num_spec
 //' @param num_immigrants num_immigrants
 //' @param mainland_n mainland_n
-//' @param island_spec island_spec
-//' @param trait_pars trait pars
+//' @param island_spec_R island_spec
+//' @param trait_pars_R trait pars
 //' @return two rates
 //' @export
 // [[Rcpp::export]]

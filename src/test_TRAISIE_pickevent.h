@@ -5,7 +5,7 @@
 #include "TRAISIE_util.h"
 
 //' test draw prop
-//' @param Rcpp::NumericVector probs
+//' @param v probs
 //' @return drawn index
 //' @export
 // [[Rcpp::export]]
@@ -54,7 +54,7 @@ island_spec create_island_spec(const Rcpp::StringMatrix& island_spec_R) {
 
 //' test immigration
 //' @param timeval timeval
-//' @param mainland_spec vector
+//' @param mainland_spec_R vector
 //' @param island_spec_R matrix
 //' @return stringmatrix island_spec
 //' @export
@@ -173,7 +173,7 @@ Rcpp::StringMatrix test_transition(Rcpp::StringMatrix& island_spec_R,
 }
 
 //' test sample spec
-//' @param mainland_spec mainland spec table
+//' @param mainland_spec_R mainland spec table
 //' @param M2 number species of trait 2 on mainland
 //' @return species index
 //' @export

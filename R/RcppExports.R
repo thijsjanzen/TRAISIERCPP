@@ -100,8 +100,8 @@ test_get_trans_rate <- function(trans_rate, trans_rate2, num_spec_trait1, num_sp
 #' @param num_spec num_spec
 #' @param num_immigrants num_immigrants
 #' @param mainland_n mainland_n
-#' @param island_spec island_spec
-#' @param trait_pars trait pars
+#' @param island_spec_R island_spec
+#' @param trait_pars_R trait pars
 #' @return two rates
 #' @export
 test_update_rates <- function(timeval, total_time, gam, laa, lac, mu, K, num_spec, num_immigrants, mainland_n, island_spec_R, trait_pars_R) {
@@ -109,7 +109,7 @@ test_update_rates <- function(timeval, total_time, gam, laa, lac, mu, K, num_spe
 }
 
 #' test draw prop
-#' @param Rcpp::NumericVector probs
+#' @param v probs
 #' @return drawn index
 #' @export
 test_draw_prop <- function(v) {
@@ -118,7 +118,7 @@ test_draw_prop <- function(v) {
 
 #' test immigration
 #' @param timeval timeval
-#' @param mainland_spec vector
+#' @param mainland_spec_R vector
 #' @param island_spec_R matrix
 #' @return stringmatrix island_spec
 #' @export
@@ -175,7 +175,7 @@ test_transition <- function(island_spec_R, focal_trait) {
 }
 
 #' test sample spec
-#' @param mainland_spec mainland spec table
+#' @param mainland_spec_R mainland spec table
 #' @param M2 number species of trait 2 on mainland
 #' @return species index
 #' @export

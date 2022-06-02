@@ -7,7 +7,7 @@
 test_draw_prop(v)
 }
 \arguments{
-\item{Rcpp::NumericVector}{probs}
+\item{v}{probs}
 }
 \value{
 drawn index

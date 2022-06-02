@@ -1747,6 +1747,7 @@ DAISIE_sim_core_trait_dep <- function(
 #' create island spec helper function
 #' @param time time
 #' @param mainland_n mainland n
+#' @param K K
 #' @param immig_rate igr
 #' @param ext_rate er
 #' @param ana_rate ar

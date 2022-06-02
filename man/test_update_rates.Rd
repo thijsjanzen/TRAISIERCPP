@@ -40,9 +40,9 @@ test_update_rates(
 
 \item{mainland_n}{mainland_n}
 
-\item{island_spec}{island_spec}
+\item{island_spec_R}{island_spec}
 
-\item{trait_pars}{trait pars}
+\item{trait_pars_R}{trait pars}
 }
 \value{
 two rates

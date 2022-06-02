@@ -26,6 +26,8 @@ create_island_spec(
 
 \item{mainland_n}{mainland n}
 
+\item{K}{K}
+
 \item{immig_rate}{igr}
 
 \item{ext_rate}{er}

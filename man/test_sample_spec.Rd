@@ -7,9 +7,9 @@
 test_sample_spec(mainland_spec_R, M2)
 }
 \arguments{
-\item{M2}{number species of trait 2 on mainland}
+\item{mainland_spec_R}{mainland spec table}
 
-\item{mainland_spec}{mainland spec table}
+\item{M2}{number species of trait 2 on mainland}
 }
 \value{
 species index
