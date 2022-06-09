@@ -161,7 +161,7 @@ void execute_immigration(island_spec& is,
   int is_it_there = -1;
   if (!is.empty()) {
     for (size_t i = 0; i < is.size(); ++i) {
-      if (is[i].parent == colonist) {
+      if (is[i].id == colonist) {
         is_it_there = i;
         break;
       }
@@ -242,7 +242,7 @@ void anagenesis(island_spec& is,
    maxspecID++;
 
   is[anagenesis].type_species = species_type::A;
-  is[anagenesis].parent = maxspecID;
+  is[anagenesis].id = maxspecID;
   is[anagenesis].ext_type = extinction_type::immig_parent;
   is[anagenesis].trait = focal_trait;
 
@@ -265,9 +265,10 @@ void cladogenesis(island_spec& is,
   if (is[to_split].type_species == species_type::C) {
     // for daughter A
     is[to_split].type_species = species_type::C; // redundant, but following R
-    is[to_split].parent = maxspecID + 1;
+    is[to_split].id = maxspecID + 1;
     auto oldstatus = is[to_split].anc_type;
     is[to_split].anc_type.push_back(species::A);
+    is[to_split].ext_type = extinction_type::NA;
     is[to_split].trait = focal_trait;
 
     // for daughter B
@@ -279,6 +280,7 @@ void cladogenesis(island_spec& is,
     add.anc_type = oldstatus;
     add.anc_type.push_back(species::B);
     add.extinction_time = timeval;
+    add.ext_type = extinction_type::NA;
     add.trait = focal_trait;
     is.push_back(add);
 
@@ -287,9 +289,10 @@ void cladogenesis(island_spec& is,
     // not cladogenetic
     // for daughter A
     is[to_split].type_species = species_type::C;
-    is[to_split].parent = maxspecID + 1;
+    is[to_split].id = maxspecID + 1;
     is[to_split].anc_type = {species::A};
     is[to_split].extinction_time = is[to_split].colonisation_time;
+    is[to_split].ext_type = extinction_type::NA;
     is[to_split].trait = focal_trait;
 
     island_spec_row add;
@@ -299,6 +302,7 @@ void cladogenesis(island_spec& is,
     add.type_species = species_type::C;
     add.anc_type = {species::B};
     add.extinction_time = timeval;
+    add.ext_type = extinction_type::NA;
     add.trait = focal_trait;
     is.push_back(add);
     maxspecID += 2;
@@ -359,12 +363,12 @@ void DAISIE_sim_update_state_trait_dep(double timeval,
     case 1: { immigration(timeval, mainland_spec, is); break;}
     case 2: { extinction(is, 1); break;}
     case 3: { anagenesis(is, maxspecID, 1); break;}
-    case 4: { cladogenesis(is, maxspecID, timeval, 1); break;}
+    case 4: { cladogenesis(is, timeval, maxspecID, 1); break;}
     case 5: { transition(is, 1); break;}
     case 6: { immigration_state2(is, mainland_spec, timeval, trait_pars.M2); break;}
     case 7: { extinction(is, 2); break;}
     case 8: { anagenesis(is, maxspecID, 2); break;}
-    case 9: { cladogenesis(is, maxspecID, timeval, 2); break;}
+    case 9: { cladogenesis(is, timeval, maxspecID, 2); break;}
     case 10:{ transition(is, 2); break;}
   }
 
