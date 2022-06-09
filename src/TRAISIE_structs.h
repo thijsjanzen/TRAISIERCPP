@@ -2,7 +2,7 @@
 #define ISLAND_SPEC_H
 
 enum class species_type {I, A, C}; // I, A, C
-enum extinction_type {NA, clado_extinct, immig_parent};
+enum anagenesis_type {NA, clado_extinct, immig_parent};
 enum class species {A, B};
 
 struct island_spec_row {
@@ -17,9 +17,9 @@ struct island_spec_row {
   // 5
   std::vector< species > anc_type;
   // 6
-  double extinction_time = -1.0;
+  double branching_time = -1.0;
   // 7
-  extinction_type ext_type;
+  anagenesis_type ext_type;
   // 8
   int trait;
 
@@ -27,7 +27,7 @@ struct island_spec_row {
     id = -1;
     parent = -1;
     colonisation_time = -1.0;
-    extinction_time = -1.0;
+    branching_time = -1.0;
   }
 
   island_spec_row(int colonist, double timeval, species_type st, int trait_val) {
@@ -43,7 +43,7 @@ struct island_spec_row {
                   double timeval, species_type st, int trait_val) {
     id = id_;
     parent = parent_;
-    extinction_time = timeval;
+    branching_time = timeval;
     type_species = st;
     trait = trait_val;
   }

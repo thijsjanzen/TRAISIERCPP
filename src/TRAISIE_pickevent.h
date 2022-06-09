@@ -60,7 +60,7 @@ void remove_cladogenetic(island_spec& is,
     auto survivors = sisters.front(); // using survivors to match R code, but this is only a single survivor at a time
 
     is[survivors].type_species = species_type::A;
-    is[survivors].ext_type = extinction_type::clado_extinct;
+    is[survivors].ext_type = anagenesis_type::clado_extinct;
     is[survivors].anc_type.clear();
 
     remove_species(is, extinct);
@@ -114,7 +114,7 @@ void remove_cladogenetic(island_spec& is,
 
     if (most_recent_split == species::A) {
       size_t first_sister = possible_sister.front();
-      is[first_sister].extinction_time = is[extinct].extinction_time;
+      is[first_sister].branching_time = is[extinct].branching_time;
     }
     // remove the offending A/B
 
@@ -243,7 +243,7 @@ void anagenesis(island_spec& is,
 
   is[anagenesis].type_species = species_type::A;
   is[anagenesis].id = maxspecID;
-  is[anagenesis].ext_type = extinction_type::immig_parent;
+  is[anagenesis].ext_type = anagenesis_type::immig_parent;
   is[anagenesis].trait = focal_trait;
 
   return;
@@ -268,7 +268,7 @@ void cladogenesis(island_spec& is,
     is[to_split].id = maxspecID + 1;
     auto oldstatus = is[to_split].anc_type;
     is[to_split].anc_type.push_back(species::A);
-    is[to_split].ext_type = extinction_type::NA;
+    is[to_split].ext_type = anagenesis_type::NA;
     is[to_split].trait = focal_trait;
 
     // for daughter B
@@ -279,8 +279,8 @@ void cladogenesis(island_spec& is,
     add.type_species = species_type::C;
     add.anc_type = oldstatus;
     add.anc_type.push_back(species::B);
-    add.extinction_time = timeval;
-    add.ext_type = extinction_type::NA;
+    add.branching_time = timeval;
+    add.ext_type = anagenesis_type::NA;
     add.trait = focal_trait;
     is.push_back(add);
 
@@ -291,8 +291,8 @@ void cladogenesis(island_spec& is,
     is[to_split].type_species = species_type::C;
     is[to_split].id = maxspecID + 1;
     is[to_split].anc_type = {species::A};
-    is[to_split].extinction_time = is[to_split].colonisation_time;
-    is[to_split].ext_type = extinction_type::NA;
+    is[to_split].branching_time = is[to_split].colonisation_time;
+    is[to_split].ext_type = anagenesis_type::NA;
     is[to_split].trait = focal_trait;
 
     island_spec_row add;
@@ -301,8 +301,8 @@ void cladogenesis(island_spec& is,
     add.colonisation_time = is[to_split].colonisation_time;
     add.type_species = species_type::C;
     add.anc_type = {species::B};
-    add.extinction_time = timeval;
-    add.ext_type = extinction_type::NA;
+    add.branching_time = timeval;
+    add.ext_type = anagenesis_type::NA;
     add.trait = focal_trait;
     is.push_back(add);
     maxspecID += 2;

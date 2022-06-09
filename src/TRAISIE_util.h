@@ -16,14 +16,14 @@ Rcpp::NumericMatrix make_stt_table_for_R(const std::vector< std::array< double, 
   return out;
 }
 
-std::string get_string(const extinction_type& ex) {
-  if (ex == extinction_type::clado_extinct) {
+std::string get_string(const anagenesis_type& an) {
+  if (an == anagenesis_type::clado_extinct) {
     return "Clado_extinct";
   }
-  if (ex == extinction_type::immig_parent) {
+  if (an == anagenesis_type::immig_parent) {
     return "Immig_parent";
   }
-  return "Incorrect_entry";
+  return "NA";
 }
 
 std::string get_string(const species_type& st) {
@@ -52,7 +52,7 @@ Rcpp::StringMatrix make_island_spec_for_R(const island_spec& is) {
     out(i, 2) = std::to_string(is[i].colonisation_time);
     out(i, 3) = get_string(is[i].type_species);
     out(i, 4) = get_string(is[i].anc_type);
-    out(i, 5) = std::to_string(is[i].extinction_time);
+    out(i, 5) = std::to_string(is[i].branching_time);
     out(i, 6) = get_string(is[i].ext_type);
     out(i, 7) = std::to_string(is[i].trait);
   }
