@@ -170,6 +170,13 @@ Rcpp::List execute_time_loop(double timeval,
 
       num_spec = island_spec_.size();
       num_immigrants = update_num_immigrants(island_spec_);
+      int max_value = 0;
+      for (auto i = 0; i < island_spec_.size(); ++i) {
+        if (max_value <= island_spec_[i].id) {
+          max_value = island_spec_[i].id;
+        }
+      }
+      maxspecID = max_value;
     }
   }
   // finalize stt_table
