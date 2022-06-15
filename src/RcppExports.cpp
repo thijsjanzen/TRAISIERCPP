@@ -23,8 +23,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // execute_time_loop
-Rcpp::List execute_time_loop(double timeval, double total_time, double gam, double laa, double lac, double mu, double K, double mainland_n, Rcpp::List trait_pars_R);
-RcppExport SEXP _TRAISIERCPP_execute_time_loop(SEXP timevalSEXP, SEXP total_timeSEXP, SEXP gamSEXP, SEXP laaSEXP, SEXP lacSEXP, SEXP muSEXP, SEXP KSEXP, SEXP mainland_nSEXP, SEXP trait_pars_RSEXP) {
+Rcpp::List execute_time_loop(double timeval, double total_time, double gam, double laa, double lac, double mu, double K, double mainland_n, Rcpp::List trait_pars_R, int max_n);
+RcppExport SEXP _TRAISIERCPP_execute_time_loop(SEXP timevalSEXP, SEXP total_timeSEXP, SEXP gamSEXP, SEXP laaSEXP, SEXP lacSEXP, SEXP muSEXP, SEXP KSEXP, SEXP mainland_nSEXP, SEXP trait_pars_RSEXP, SEXP max_nSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -37,7 +37,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type K(KSEXP);
     Rcpp::traits::input_parameter< double >::type mainland_n(mainland_nSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type trait_pars_R(trait_pars_RSEXP);
-    rcpp_result_gen = Rcpp::wrap(execute_time_loop(timeval, total_time, gam, laa, lac, mu, K, mainland_n, trait_pars_R));
+    Rcpp::traits::input_parameter< int >::type max_n(max_nSEXP);
+    rcpp_result_gen = Rcpp::wrap(execute_time_loop(timeval, total_time, gam, laa, lac, mu, K, mainland_n, trait_pars_R, max_n));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -258,7 +259,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_TRAISIERCPP_sample_event", (DL_FUNC) &_TRAISIERCPP_sample_event, 1},
-    {"_TRAISIERCPP_execute_time_loop", (DL_FUNC) &_TRAISIERCPP_execute_time_loop, 9},
+    {"_TRAISIERCPP_execute_time_loop", (DL_FUNC) &_TRAISIERCPP_execute_time_loop, 10},
     {"_TRAISIERCPP_test_get_immig_rate", (DL_FUNC) &_TRAISIERCPP_test_get_immig_rate, 7},
     {"_TRAISIERCPP_test_get_ext_rate", (DL_FUNC) &_TRAISIERCPP_test_get_ext_rate, 6},
     {"_TRAISIERCPP_test_get_ana_rate", (DL_FUNC) &_TRAISIERCPP_test_get_ana_rate, 5},

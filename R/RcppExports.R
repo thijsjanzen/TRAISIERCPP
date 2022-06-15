@@ -19,10 +19,11 @@ sample_event <- function(event_prob) {
 #' @param K K
 #' @param mainland_n number of species on mainland
 #' @param trait_pars_R trait pars
+#' @param max_n maximum number of species
 #' @return list with stt_table and island_spec
 #' @export
-execute_time_loop <- function(timeval, total_time, gam, laa, lac, mu, K, mainland_n, trait_pars_R) {
-    .Call('_TRAISIERCPP_execute_time_loop', PACKAGE = 'TRAISIERCPP', timeval, total_time, gam, laa, lac, mu, K, mainland_n, trait_pars_R)
+execute_time_loop <- function(timeval, total_time, gam, laa, lac, mu, K, mainland_n, trait_pars_R, max_n) {
+    .Call('_TRAISIERCPP_execute_time_loop', PACKAGE = 'TRAISIERCPP', timeval, total_time, gam, laa, lac, mu, K, mainland_n, trait_pars_R, max_n)
 }
 
 #' function to test get_immigration_rate

@@ -71,18 +71,20 @@ int update_num_immigrants(const island_spec& is) {
 //' @param K K
 //' @param mainland_n number of species on mainland
 //' @param trait_pars_R trait pars
+//' @param max_n maximum number of species
 //' @return list with stt_table and island_spec
 //' @export
 // [[Rcpp::export]]
 Rcpp::List execute_time_loop(double timeval,
-                      double total_time,
-                      double gam,
-                      double laa,
-                      double lac,
-                      double mu,
-                      double K,
-                      double mainland_n,
-                      Rcpp::List trait_pars_R) {
+                             double total_time,
+                             double gam,
+                             double laa,
+                             double lac,
+                             double mu,
+                             double K,
+                             double mainland_n,
+                             Rcpp::List trait_pars_R,
+                             int max_n) {
 
  // output("area_pars loaded");
   rates trait_pars(gam, laa, lac, mu, trait_pars_R);
@@ -106,8 +108,6 @@ Rcpp::List execute_time_loop(double timeval,
   int num_immigrants = update_num_immigrants(island_spec_);
 
  // output("starting loop");
-
-
 
   while (timeval < total_time) {
     auto all_rates = update_rates(
@@ -139,25 +139,6 @@ Rcpp::List execute_time_loop(double timeval,
                                         all_rates.ana_rate2,
                                         all_rates.clado_rate2,
                                         all_rates.trans_rate2});
-/*
-      std::vector<double> v = {all_rates.immig_rate,
-                               all_rates.ext_rate,
-                               all_rates.ana_rate,
-                               all_rates.clado_rate,
-                               all_rates.trans_rate,
-                               all_rates.immig_rate2,
-                               all_rates.ext_rate2,
-                               all_rates.ana_rate2,
-                               all_rates.clado_rate2,
-                               all_rates.trans_rate2};
-
-      std::cerr << possible_event << " ";
-      for (auto i : v) {
-        std::cerr << i << " ";
-      } std::cerr << "\n"; force_output();*/
-
-    //  auto possible_event = all_rates.sample_event();
-   //   Rcpp::Rcout << possible_event << "\n";
 
       DAISIE_sim_update_state_trait_dep(timeval,
                                         total_time,
@@ -170,6 +151,8 @@ Rcpp::List execute_time_loop(double timeval,
 
       num_spec = island_spec_.size();
       num_immigrants = update_num_immigrants(island_spec_);
+
+      if (num_spec > max_n) break;
     }
   }
   // finalize stt_table

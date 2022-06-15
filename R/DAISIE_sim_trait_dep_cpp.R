@@ -12,6 +12,7 @@
 #' Returns R list object that contains the simulated islands
 #'
 #' @inheritParams default_params_doc
+#' @param max_n maximum number of species
 #'
 #' @return Each simulated dataset is an element of the list, which can be
 #' called using [[x]]. For example if the object is called island_replicates,
@@ -81,6 +82,7 @@ DAISIE_sim_trait_dep_cpp <- function(
     cond = 0,
     verbose = TRUE,
     trait_pars = NULL,
+    max_n = 1e4,
     ...
 ) {
   total_time <- time
@@ -124,7 +126,8 @@ DAISIE_sim_trait_dep_cpp <- function(
               hyper_pars = hyper_pars,
               area_pars = area_pars,
               extcutoff = extcutoff,
-              trait_pars = trait_pars_onecolonize
+              trait_pars = trait_pars_onecolonize,
+              max_n = max_n
             )
           }
 
@@ -148,7 +151,8 @@ DAISIE_sim_trait_dep_cpp <- function(
               hyper_pars = hyper_pars,
               area_pars = area_pars,
               extcutoff = extcutoff,
-              trait_pars = trait_pars_onecolonize
+              trait_pars = trait_pars_onecolonize,
+              max_n = max_n
             )
           }
         }

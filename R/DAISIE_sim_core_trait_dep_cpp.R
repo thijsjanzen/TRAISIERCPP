@@ -20,7 +20,8 @@ DAISIE_sim_core_trait_dep_cpp <- function(
     hyper_pars,
     area_pars,
     extcutoff = 1000,
-    trait_pars = NULL
+    trait_pars = NULL,
+    max_n = 1e4
 ) {
 
   #### Initialization ####
@@ -53,7 +54,8 @@ DAISIE_sim_core_trait_dep_cpp <- function(
                                mu,
                                K,
                                mainland_n,
-                               trait_pars)
+                               trait_pars,
+                               max_n)
 
   stt_table = results$stt_table
   colnames(stt_table) <- c("Time","nI","nA","nC","nI2","nA2","nC2")

@@ -3,14 +3,14 @@
 #' @param parameters A vector for CES rates.
 #' @param K Carrying capacity, Inf for diverdity-independent models.
 #' @param replicates The number of replicates(islands) for TraiSIE simulation.
-#'
+#' @param max_n maximum number of species allowed
 #' @return A list contains simulated islands
 #' @author Shu Xie
 #' @export
 #' @rawNamespace useDynLib(TRAISIERCPP)
 #' @rawNamespace import(Rcpp)
 #' @rawNamespace import(RcppArmadillo)
-get_TraiSIE_sim_cpp <- function(parameters, K, replicates){
+get_TraiSIE_sim_cpp <- function(parameters, K, replicates, max_n){
   sim <- list()
   for (j in seq_len(replicates)) {
     sim[[j]] <- TRAISIERCPP::DAISIE_sim_trait_dep_cpp(
@@ -28,7 +28,8 @@ get_TraiSIE_sim_cpp <- function(parameters, K, replicates){
                                              ana_rate2 = parameters[8],
                                              trans_rate = parameters[9],
                                              trans_rate2 = parameters[10],
-                                             M2 = 500)
+                                             M2 = 500),
+      max_n = max_n
     )
   }
   return(sim)
